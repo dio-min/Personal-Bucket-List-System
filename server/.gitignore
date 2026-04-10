@@ -1,0 +1,25 @@
+# Server .gitignore
+
+# Environment Variables
+.env
+.env.local
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Logs
+*.log
+logs/
+
+# Database / Temp
+*.sqlite
+*.db
+*.tmp
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store

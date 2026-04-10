@@ -1,0 +1,14 @@
+# Root .gitignore
+
+# Environment
+.env
+.env.local
+
+# Global ignores
+node_modules/
+dist/
+*.log
+
+# Ignore client & server specific build folders (backup)
+client/dist/
+server/dist/
