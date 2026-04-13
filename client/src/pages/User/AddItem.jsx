@@ -4,6 +4,7 @@ import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import axios from "axios";
 import { Button, Modal} from "@heroui/react";
 import {CirclePlusFill} from '@gravity-ui/icons';
+import API_BASE_URL from "../../lib/config";
 
 
 
@@ -53,7 +54,7 @@ function AddItem() {
 
       // 2) Add to backend MongoDB
       const response = await axios.post(
-        "http://localhost:5050/api/goal/addItem",
+        `${API_BASE_URL}/api/goal/addItem`,
         {
           title,
           description,

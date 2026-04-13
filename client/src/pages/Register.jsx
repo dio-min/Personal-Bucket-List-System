@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-
+import API_BASE_URL from "../lib/config";
 import { auth } from "../lib/firebase";
 
 import axios from "axios";
@@ -28,7 +28,7 @@ function Register() {
       displayName: username
     });
       const response = await axios.post(
-        "http://localhost:5050/api/user/register",
+        `${API_BASE_URL}/api/user/register`,
         {
           username,
           email,

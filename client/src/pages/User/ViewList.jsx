@@ -24,6 +24,7 @@ import {
 import axios from "axios";
 
 import AddItem from "./AddItem";
+import API_BASE_URL from "../../lib/config";
 
 function ViewList() {
   const [goals, setGoals] = useState([]);
@@ -102,7 +103,7 @@ function ViewList() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5050/api/goal/getitemsByTitle",
+        `${API_BASE_URL}/api/goal/getitemsByTitle`,
         {
           title: title,
         },
