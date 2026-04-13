@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/firebase"; // your firebase config
 import axios from "axios";
 import BorderGlow from "../component/BorderGlow";
+import API_BASE_URL from "../lib/config";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -21,8 +22,8 @@ function Login() {
       );
       const firebaseUser = userCredential.user;
 
-      const response = await axios.post(
-        "http://localhost:5050/api/user/login",
+
+      const response = await axios.post(`${API_BASE_URL}/api/user/login`,
         {
           uid: firebaseUser.uid,
           email: firebaseUser.email,

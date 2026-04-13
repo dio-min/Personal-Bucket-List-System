@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { db, auth } from "../../lib/firebase"; // Adjust path if needed
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import axios from "axios";
-import { Button, Modal, Input, Label, TextField } from "@heroui/react";
+import { Button, Modal} from "@heroui/react";
 import {CirclePlusFill} from '@gravity-ui/icons';
 
 

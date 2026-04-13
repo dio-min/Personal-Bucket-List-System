@@ -6,11 +6,21 @@ import {
   where,
   deleteDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../../lib/firebase";
 import { TrashBin, Pencil, CircleInfoFill } from "@gravity-ui/icons";
-import { SearchField, Label, Card, AlertDialog, Button, Table, EmptyState } from "@heroui/react";
+import {
+  SearchField,
+  Label,
+  Card,
+  AlertDialog,
+  Button,
+  Table,
+  EmptyState,
+  Modal,
+} from "@heroui/react";
 import axios from "axios";
 
 import AddItem from "./AddItem";
@@ -24,6 +34,11 @@ function ViewList() {
 
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editCategory, setEditCategory] = useState("");
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -161,7 +176,7 @@ function ViewList() {
               <Table.Header className="sticky top-0 z-10 bg-surface-secondary">
                 <Table.Column isRowHeader>Title</Table.Column>
                 <Table.Column>Category</Table.Column>
-                <Table.Column >Action</Table.Column>
+                <Table.Column>Action</Table.Column>
               </Table.Header>
               <Table.Body
                 renderEmptyState={() => (
@@ -179,12 +194,15 @@ function ViewList() {
                     <Table.Cell>{goal.title}</Table.Cell>
                     <Table.Cell>{goal.category}</Table.Cell>
                     <Table.Cell>
+                      {/* view details */}
                       <Button
                         variant="default"
                         onClick={() => viewGoalDetails(goal.title)}
                       >
                         <CircleInfoFill className="size-5" />
                       </Button>
+
+                      {/* delete button */}
                       <AlertDialog>
                         <Button variant="default">
                           <TrashBin />
@@ -228,7 +246,32 @@ function ViewList() {
                         </AlertDialog.Backdrop>
                       </AlertDialog>
 
-                      
+                      {/* update button */}
+                      <Modal>
+                        <Button variant="default">
+                          <Pencil />
+                        </Button>
+                        <Modal.Backdrop className="bg-black/80 backdrop-opaque-sm">
+                          <Modal.Container>
+                            <Modal.Dialog className="w-full max-w-lg p-6 bg-black border border-white-700 rounded-2xl shadow-xl text-white">
+                              <Modal.CloseTrigger />
+                              <Modal.Header>
+                                <Modal.Icon className="bg-default text-foreground">
+                                  <Pencil />
+                                </Modal.Icon>
+                                <Modal.Heading className="text-xl font-semibold text-white">Update Details</Modal.Heading>
+                              </Modal.Header>
+                              <Modal.Body>
+                                
+
+                              </Modal.Body>
+                              <Modal.Footer>
+                                
+                              </Modal.Footer>
+                            </Modal.Dialog>
+                          </Modal.Container>
+                        </Modal.Backdrop>
+                      </Modal>
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -240,56 +283,70 @@ function ViewList() {
 
       <div>
         <Card className="w-[400px] h-[490px] bg-grey border border-white-700 rounded-2xl shadow-xl text-white overflow-hidden ">
-  <Card.Header className="px-6 pt-6 pb-4 border-b border-white/10">
-    <Card.Title className="text-xl font-semibold">
-      Goal Details
-    </Card.Title>
-  </Card.Header>
+          <Card.Header className="px-6 pt-6 pb-4 border-b border-white/10">
+            <Card.Title className="text-xl font-semibold">
+              Goal Details
+            </Card.Title>
+          </Card.Header>
 
-  <Card.Content className="p-6 space-y-5 text-sm overflow-auto h-full ">
-    {selectedGoal ? (
-      <div className="space-y-4">
-        <div>
-          <p className="text-muted text-xs uppercase tracking-widest mb-1">TITLE</p>
-          <p className="font-medium">{selectedGoal.title}</p>
-        </div>
+          <Card.Content className="p-6 space-y-5 text-sm overflow-auto h-full ">
+            {selectedGoal ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-muted text-xs uppercase tracking-widest mb-1">
+                    TITLE
+                  </p>
+                  <p className="font-medium">{selectedGoal.title}</p>
+                </div>
 
-        <div>
-          <p className="text-muted text-xs uppercase tracking-widest mb-1">DESCRIPTION</p>
-          <p className="leading-relaxed">{selectedGoal.description}</p>
-        </div>
+                <div>
+                  <p className="text-muted text-xs uppercase tracking-widest mb-1">
+                    DESCRIPTION
+                  </p>
+                  <p className="leading-relaxed">{selectedGoal.description}</p>
+                </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-muted text-xs uppercase tracking-widest mb-1">DATE</p>
-            <p>{selectedGoal.date}</p>
-          </div>
-          <div>
-            <p className="text-muted text-xs uppercase tracking-widest mb-1">CATEGORY</p>
-            <p>{selectedGoal.category}</p>
-          </div>
-        </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-muted text-xs uppercase tracking-widest mb-1">
+                      DATE
+                    </p>
+                    <p>{selectedGoal.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted text-xs uppercase tracking-widest mb-1">
+                      CATEGORY
+                    </p>
+                    <p>{selectedGoal.category}</p>
+                  </div>
+                </div>
 
-        <div>
-          <p className="text-muted text-xs uppercase tracking-widest mb-1">STATUS</p>
-          <p className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium">
-            {selectedGoal.status}
-          </p>
-        </div>
+                <div>
+                  <p className="text-muted text-xs uppercase tracking-widest mb-1">
+                    STATUS
+                  </p>
+                  <p className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+                    {selectedGoal.status}
+                  </p>
+                </div>
 
-        <div >
-          <Button style={{display:"flex", justifySelf:"right"}}>Mark As Done</Button>
-        </div>
-      </div>
-    ) : (
-      <div className="h-full flex items-center justify-center text-center">
-        <p className="text-muted">
-          Select a goal from the list<br />to view its details here.
-        </p>
-      </div>
-    )}
-  </Card.Content>
-</Card>
+                <div>
+                  <Button style={{ display: "flex", justifySelf: "right" }}>
+                    Mark As Done
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-center">
+                <p className="text-muted">
+                  Select a goal from the list
+                  <br />
+                  to view its details here.
+                </p>
+              </div>
+            )}
+          </Card.Content>
+        </Card>
       </div>
     </div>
   );
