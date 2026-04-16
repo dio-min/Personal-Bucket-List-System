@@ -103,7 +103,7 @@ function ViewList() {
 
     try {
       const response = await axios.post(
-        `/api/goal/getitemsByTitle`,
+        `${API_BASE_URL}/api/goal/getitemsByTitle`,
         {
           title: title,
         },
