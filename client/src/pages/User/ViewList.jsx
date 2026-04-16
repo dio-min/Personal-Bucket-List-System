@@ -99,11 +99,11 @@ function ViewList() {
   }, [goals, searchTerm]);
 
   const viewGoalDetails = async (title) => {
-    // Implement view details functionality here
+    
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/goal/getitemsByTitle`,
+        `/api/goal/getitemsByTitle`,
         {
           title: title,
         },
