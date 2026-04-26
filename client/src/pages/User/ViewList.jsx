@@ -25,6 +25,7 @@ import axios from "axios";
 
 import AddItem from "./AddItem";
 import API_BASE_URL from "../../lib/config";
+import { Update } from "./Update";
 
 function ViewList() {
   const [goals, setGoals] = useState([]);
@@ -145,6 +146,8 @@ function ViewList() {
     console.log("Delete item with id:", id);
   };
 
+  
+
   if (loading) {
     return <div className="text-white p-4">Loading your bucketlist...</div>;
   }
@@ -155,20 +158,23 @@ function ViewList() {
 
   return (
     <div style={{ display: "flex", gap: "30px" }}>
-      <AddItem />
+    
       <div>
-        <div style={{ marginBottom: "30px" }}>
+        <div style={{ marginBottom: "30px", display:"flex", alignItems:"end"}}>
+          
           <SearchField value={searchTerm} onChange={setSearchTerm}>
             <Label>Search</Label>
             <SearchField.Group>
               <SearchField.SearchIcon />
               <SearchField.Input
-                className="w-[280px]"
+                className="w-[540px]"
                 placeholder="Search..."
               />
               <SearchField.ClearButton />
+              
             </SearchField.Group>
           </SearchField>
+          <AddItem />
         </div>
 
         <Table className="h-[400px] overflow-auto ">
@@ -191,6 +197,8 @@ function ViewList() {
                 )}
               >
                 {filteredGoals.map((goal) => (
+
+                  
                   <Table.Row key={goal.id} className="hover:bg-purple-50">
                     <Table.Cell>{goal.title}</Table.Cell>
                     <Table.Cell>{goal.category}</Table.Cell>
@@ -248,31 +256,9 @@ function ViewList() {
                       </AlertDialog>
 
                       {/* update button */}
-                      <Modal>
-                        <Button variant="default">
-                          <Pencil />
-                        </Button>
-                        <Modal.Backdrop className="bg-black/80 backdrop-opaque-sm">
-                          <Modal.Container>
-                            <Modal.Dialog className="w-full max-w-lg p-6 bg-black border border-white-700 rounded-2xl shadow-xl text-white">
-                              <Modal.CloseTrigger />
-                              <Modal.Header>
-                                <Modal.Icon className="bg-default text-foreground">
-                                  <Pencil />
-                                </Modal.Icon>
-                                <Modal.Heading className="text-xl font-semibold text-white">Update Details</Modal.Heading>
-                              </Modal.Header>
-                              <Modal.Body>
-                                
+                      <Update title={goal.title} />
 
-                              </Modal.Body>
-                              <Modal.Footer>
-                                
-                              </Modal.Footer>
-                            </Modal.Dialog>
-                          </Modal.Container>
-                        </Modal.Backdrop>
-                      </Modal>
+                      
                     </Table.Cell>
                   </Table.Row>
                 ))}

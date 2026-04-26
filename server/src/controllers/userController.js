@@ -41,98 +41,98 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
-// const loginUser = asyncHandler(async (req, res) => {
-//   const { uid, email } = req.body;
-
-//   // Optional: Find user in MongoDB
-//   let user = await User.findOne({ firebaseUid: uid });
-
-//   if (!user) {
-//     // First time login after register → create profile if needed
-//     user = new User({
-//       username: email.split('@')[0], // temporary username
-//       email,
-//       firebaseUid: uid
-//     });
-//     await user.save();
-//   }
-
-//   res.status(200).json({
-//     message: "Login successful",
-//     user: {
-//       id: user._id,
-//       username: user.username,
-//       email: user.email,
-//       firebaseUid: user.firebaseUid
-//     }
-//   });
-// });
-
 const loginUser = asyncHandler(async (req, res) => {
   const { uid, email } = req.body;
 
-  console.log("=== LOGIN REQUEST RECEIVED ===");
-  console.log("UID:", uid);
-  console.log("Email:", email);
+  // Optional: Find user in MongoDB
+  let user = await User.findOne({ firebaseUid: uid });
 
-  if (!uid || !email) {
-    return res.status(400).json({ 
-      success: false,
-      message: "UID and email are required" 
+  if (!user) {
+    // First time login after register → create profile if needed
+    user = new User({
+      username: email.split('@')[0], // temporary username
+      email,
+      firebaseUid: uid
     });
+    await user.save();
   }
 
-  try {
-    let user = await User.findOne({ firebaseUid: uid });
-
-    if (!user) {
-      console.log("→ Creating NEW user...");
-      
-      const defaultUsername = email.split('@')[0] || `user_${Date.now().toString().slice(-6)}`;
-
-      user = new User({
-        username: defaultUsername,
-        email,
-        firebaseUid: uid
-      });
-
-      const savedUser = await user.save();
-      console.log("✅ NEW USER SAVED SUCCESSFULLY:", savedUser._id);
-      user = savedUser;   // use the saved document
-    } else {
-      console.log("→ Existing user found:", user._id);
-      
-      // Update email if changed
-      if (user.email !== email) {
-        user.email = email;
-        await user.save();
-        console.log("✅ User email updated");
-      }
+  res.status(200).json({
+    message: "Login successful",
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      firebaseUid: user.firebaseUid
     }
-
-    // ✅ Better response
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      user: {
-        id: user._id.toString(),           // convert ObjectId to string
-        username: user.username,
-        email: user.email,
-        firebaseUid: user.firebaseUid
-      }
-    });
-
-  } catch (err) {
-    console.error("❌ LOGIN / SAVE ERROR:", err.message);
-    console.error("Full error:", err);
-    
-    res.status(500).json({ 
-      success: false,
-      message: "Database error during login", 
-      error: err.message 
-    });
-  }
+  });
 });
+
+// const loginUser = asyncHandler(async (req, res) => {
+//   const { uid, email } = req.body;
+
+//   console.log("=== LOGIN REQUEST RECEIVED ===");
+//   console.log("UID:", uid);
+//   console.log("Email:", email);
+
+//   if (!uid || !email) {
+//     return res.status(400).json({ 
+//       success: false,
+//       message: "UID and email are required" 
+//     });
+//   }
+
+//   try {
+//     let user = await User.findOne({ firebaseUid: uid });
+
+//     if (!user) {
+//       console.log("→ Creating NEW user...");
+      
+//       const defaultUsername = email.split('@')[0] || `user_${Date.now().toString().slice(-6)}`;
+
+//       user = new User({
+//         username: defaultUsername,
+//         email,
+//         firebaseUid: uid
+//       });
+
+//       const savedUser = await user.save();
+//       console.log("✅ NEW USER SAVED SUCCESSFULLY:", savedUser._id);
+//       user = savedUser;   // use the saved document
+//     } else {
+//       console.log("→ Existing user found:", user._id);
+      
+//       // Update email if changed
+//       if (user.email !== email) {
+//         user.email = email;
+//         await user.save();
+//         console.log("✅ User email updated");
+//       }
+//     }
+
+//     // ✅ Better response
+//     res.status(200).json({
+//       success: true,
+//       message: "Login successful",
+//       user: {
+//         id: user._id.toString(),           // convert ObjectId to string
+//         username: user.username,
+//         email: user.email,
+//         firebaseUid: user.firebaseUid
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error("❌ LOGIN / SAVE ERROR:", err.message);
+//     console.error("Full error:", err);
+    
+//     res.status(500).json({ 
+//       success: false,
+//       message: "Database error during login", 
+//       error: err.message 
+//     });
+//   }
+// });
 
 
 

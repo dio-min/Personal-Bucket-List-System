@@ -1,9 +1,13 @@
 import React from 'react'
+import { Button, Alert } from '@heroui/react';
 
-function Update() {
-  return (
-    <div>Update</div>
-  )
-}
+export const Update = ({ title }) => {
+  const handleUpdate = async () => {
+      // Implement delete functionality here
+      alert(title)
+    };
+  return<>
+  <Button onClick={handleUpdate}>Update</Button></>
+  ;
+};
 
-export default Update

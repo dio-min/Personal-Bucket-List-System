@@ -24,6 +24,10 @@ function AddItem() {
       setError("All fields are required!");
       return;
     }
+    if (title.length<3){
+      setError("3 letters maximum")
+      return;
+    }
 
     const currentUser = auth.currentUser;
     const firebaseUid = currentUser?.uid || null;
@@ -32,6 +36,8 @@ function AddItem() {
       setError("You must be logged in to add an item.");
       return;
     }
+
+    
 
     setLoading(true);
     setError("");
@@ -71,7 +77,7 @@ function AddItem() {
       console.log("Firestore doc id:", firestoreDoc.id);
       console.log("MongoDB response:", response.data);
 
-      setSuccess("Item added successfully ");
+      
 
       // Clear the form
       setTitle("");

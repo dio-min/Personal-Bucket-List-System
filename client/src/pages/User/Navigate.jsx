@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Logout from "../Logout";
 
 function Navigate() {
   return (
@@ -7,15 +8,15 @@ function Navigate() {
         
         {/* Logo / Brand */}
         <div className="flex items-center gap-3">
+          <img src="/logos1.png" alt="Logo" style={{width: "50px"}}/>
           <h1 className="text-2xl font-bold text-white">HeyBuck</h1>
         </div>
 
         {/* Navigation Links */}
         <div className="flex items-center gap-8 text-sm">
           <p>Home</p>
-          <Link to="/add-item" className="text-gray-300 hover:text-white transition-colors">
-            Log out
-          </Link>
+          <Logout />
+          
           <Link to="/album" className="text-gray-300 hover:text-white transition-colors">
             Album
           </Link>

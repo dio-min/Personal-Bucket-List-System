@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import API_BASE_URL from "../lib/config";
 import { auth } from "../lib/firebase";
+import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 import BorderGlow from "../component/BorderGlow";
@@ -12,9 +13,20 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate= useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (password.length<8){
+      alert("maximum of 8");
+      return
+    }
+
+    if (!/[0-9]/.test(password)){
+      alert("Password must contain at least one number.");
+      return;
+    }
     try {
       // 1. Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(
@@ -35,9 +47,14 @@ function Register() {
           uid: firebaseUser.uid, // ← correct
         },
       );
+      setEmail("");
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
 
       console.log("Backend response:", response.data);
       alert("User registered successfully!");
+      navigate("/login");
 
       // Optional: redirect
       // navigate('/login');
