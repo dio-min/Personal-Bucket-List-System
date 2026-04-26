@@ -2,12 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./src/database/database');
 const cors = require('cors');
-const userRoutes=require('./src/routers/userRoutes');
-const goalRoutes=require('./src/routers/goalRoutes');
-
-const PORT = process.env.PORT || 5050;
+const userRoutes = require('./src/routers/userRoutes');
+const goalRoutes = require('./src/routers/goalRoutes');
 
 dotenv.config();
+
+// ✅ Use Render's PORT or fallback to 5050 for local development
+const PORT = process.env.PORT || 5050;
+
 connectDB();
 
 const app = express();
@@ -23,8 +25,7 @@ app.use(express.json());
 app.use('/api/user', userRoutes);
 app.use('/api/goal', goalRoutes);
 
-
-// Error handler (must be after routes)
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   const statusCode = err.statusCode || 500;
@@ -32,6 +33,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message });
 });
 
-app.listen(PORT,'0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on port ${PORT}`);
 });
