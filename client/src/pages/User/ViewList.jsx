@@ -87,14 +87,14 @@ function ViewList() {
   }, [uid]);
 
   const filteredGoals = useMemo(() => {
-    if (!searchTerm.trim()) return goals; // If search is empty, show all goals
+    if (!searchTerm.trim()) return goals; 
 
-    const term = searchTerm.toLowerCase().trim(); // Convert to lowercase for case-insensitive search
+    const term = searchTerm.toLowerCase().trim(); 
 
     return goals.filter(
       (goal) =>
-        goal.title?.toLowerCase().includes(term) || // Search in title
-        goal.category?.toLowerCase().includes(term), // Search in category
+        goal.title?.toLowerCase().includes(term) ||
+        goal.category?.toLowerCase().includes(term), 
     );
   }, [goals, searchTerm]);
 
@@ -111,27 +111,27 @@ function ViewList() {
 
       const data = response.data;
 
-      console.log("Title sent to backend:", data);
+      // console.log("Title sent to backend:", data);
 
-      // Safely extract the goal from backend response
-      const goal = data?.items?.[0];
+      // // Safely extract the goal from backend response
+      // const goal = data?.items?.[0];
 
-      if (!goal) {
-        alert("No details found for this goal.");
-        return;
-      }
+      // if (!goal) {
+      //   alert("No details found for this goal.");
+      //   return;
+      // }
 
-      // Clean data for UI display
-      const goalDetails = {
-        title: goal.title || "Untitled Goal",
-        description: goal.description || "No description provided",
-        date: goal.date || "Not specified",
-        category: goal.category || "Uncategorized",
-        status: goal.status || "Pending",
-      };
+      // // Clean data for UI display
+      // const goalDetails = {
+      //   title: goal.title || "Untitled Goal",
+      //   description: goal.description || "No description provided",
+      //   date: goal.date || "Not specified",
+      //   category: goal.category || "Uncategorized",
+      //   status: goal.status || "Pending",
+      // };
 
-      setSelectedGoal(goalDetails);
-      setShowDetails(true);
+      // setSelectedGoal(goalDetails);
+      // setShowDetails(true);
     } catch (err) {
       console.error("Error fetching goal details:", err);
       alert("Failed to fetch goal details. Please try again later.");
