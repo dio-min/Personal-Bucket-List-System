@@ -5,7 +5,7 @@ const cors = require('cors');
 const userRoutes=require('./src/routers/userRoutes');
 const goalRoutes=require('./src/routers/goalRoutes');
 
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT;
 
 dotenv.config();
 connectDB();
@@ -13,7 +13,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,   // ← Change this
+  origin: process.env.FRONTEND_URL,   
   credentials: true, 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

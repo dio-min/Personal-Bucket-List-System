@@ -111,27 +111,27 @@ function ViewList() {
 
       const data = response.data;
 
-      // console.log("Title sent to backend:", data);
+      console.log("Title sent to backend:", data);
 
-      // // Safely extract the goal from backend response
-      // const goal = data?.items?.[0];
+      // Safely extract the goal from backend response
+      const goal = data?.items?.[0];
 
-      // if (!goal) {
-      //   alert("No details found for this goal.");
-      //   return;
-      // }
+      if (!goal) {
+        alert("No details found for this goal.");
+        return;
+      }
 
-      // // Clean data for UI display
-      // const goalDetails = {
-      //   title: goal.title || "Untitled Goal",
-      //   description: goal.description || "No description provided",
-      //   date: goal.date || "Not specified",
-      //   category: goal.category || "Uncategorized",
-      //   status: goal.status || "Pending",
-      // };
+      // Clean data for UI display
+      const goalDetails = {
+        title: goal.title || "Untitled Goal",
+        description: goal.description || "No description provided",
+        date: goal.date || "Not specified",
+        category: goal.category || "Uncategorized",
+        status: goal.status || "Pending",
+      };
 
-      // setSelectedGoal(goalDetails);
-      // setShowDetails(true);
+      setSelectedGoal(goalDetails);
+      setShowDetails(true);
     } catch (err) {
       console.error("Error fetching goal details:", err);
       alert("Failed to fetch goal details. Please try again later.");

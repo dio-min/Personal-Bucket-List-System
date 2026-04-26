@@ -22,7 +22,7 @@ const itemSchema = new mongoose.Schema({
     required: [true, 'Firebase UID is required']
   },
 
-  //Dagdag lang pwedeng idelete kung di gumana
+  
   status: {
     type: String,
     enum: ['in-progress', 'completed'],
