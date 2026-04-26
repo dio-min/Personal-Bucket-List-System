@@ -76,7 +76,10 @@ const loginUser = asyncHandler(async (req, res) => {
   console.log("Email:", email);
 
   if (!uid || !email) {
-    return res.status(400).json({ message: "UID and email are required" });
+    return res.status(400).json({ 
+      success: false,
+      message: "UID and email are required" 
+    });
   }
 
   try {
@@ -84,17 +87,22 @@ const loginUser = asyncHandler(async (req, res) => {
 
     if (!user) {
       console.log("→ Creating NEW user...");
+      
+      const defaultUsername = email.split('@')[0] || `user_${Date.now().toString().slice(-6)}`;
+
       user = new User({
-        username: email.split('@')[0], 
+        username: defaultUsername,
         email,
         firebaseUid: uid
       });
 
       const savedUser = await user.save();
       console.log("✅ NEW USER SAVED SUCCESSFULLY:", savedUser._id);
+      user = savedUser;   // use the saved document
     } else {
       console.log("→ Existing user found:", user._id);
-      // Update email if it changed
+      
+      // Update email if changed
       if (user.email !== email) {
         user.email = email;
         await user.save();
@@ -102,19 +110,24 @@ const loginUser = asyncHandler(async (req, res) => {
       }
     }
 
+    // ✅ Better response
     res.status(200).json({
+      success: true,
       message: "Login successful",
       user: {
-        id: user._id,
+        id: user._id.toString(),           // convert ObjectId to string
         username: user.username,
         email: user.email,
         firebaseUid: user.firebaseUid
       }
     });
+
   } catch (err) {
     console.error("❌ LOGIN / SAVE ERROR:", err.message);
     console.error("Full error:", err);
+    
     res.status(500).json({ 
+      success: false,
       message: "Database error during login", 
       error: err.message 
     });

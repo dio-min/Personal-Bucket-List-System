@@ -29,9 +29,15 @@ function Login() {
           email: firebaseUser.email,
         },
       );
-      console.log("Login successful:", response.data);
+      if (response.data.success) {
+      // Save user data for later use (recommended)
+      localStorage.setItem("currentUser", JSON.stringify(response.data.user));
+
       alert("Login successful!");
-      navigate("/dashboard"); // Redirect to dashboard after login
+      navigate("/dashboard");
+    } else {
+      alert(response.data.message || "Login failed");
+    }
     } catch (err) {
       console.error("Login error:", err);
       alert(err.message || "Invalid email or password");
