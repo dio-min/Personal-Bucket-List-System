@@ -24,19 +24,15 @@ const connectDB = async () => {
         }
 
     } catch (error) {
-    console.error(`MongoDB Connection Error: ${error.message}`);
-    
-    if (error.code === 8000) {
-        console.error('Wrong database credentials');
-    } else if (error.code === 'ENOTFOUND') {
-        console.error('Could not reach database server');
-    } else {
-        console.error('Unexpected MongoDB error');
+        console.error(`MongoDB Connection Error: ${error.message}`);
+        // Log more details about the error for debugging
+        if (error.code === 8000) {
+            console.error('Wrong database credentials');
+        } else if (error.code === 'ENOTFOUND') {
+            console.error('Could not reach database server');
+        }
+        process.exit(1);
     }
-    
-    // Do NOT exit on Render — just log the error
-    // process.exit(1);   // commented out
-}
 };
 
 module.exports = connectDB;
