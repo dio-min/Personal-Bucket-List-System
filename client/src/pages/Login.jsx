@@ -23,21 +23,16 @@ function Login() {
       const firebaseUser = userCredential.user;
 
 
-      const response = await axios.post(`https://personal-bucket-list-system-a.onrender.com/api/user/login`,
+      const response = await axios.post(`${API_BASE_URL}/api/user/login`,
         {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
         },
       );
-      if (response.data.success) {
-      // Save user data for later use (recommended)
-      localStorage.setItem("currentUser", JSON.stringify(response.data.user));
-
+      console.log("Login successful:", response.data);
       alert("Login successful!");
-      navigate("/dashboard");
-    } else {
-      alert(response.data.message || "Login failed");
-    }
+      navigate("/dashboard"); // Redirect to dashboard after login
+      
     } catch (err) {
       console.error("Login error:", err);
       alert(err.message || "Invalid email or password");
