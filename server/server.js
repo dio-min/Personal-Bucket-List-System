@@ -5,7 +5,7 @@ const cors = require('cors');
 const userRoutes=require('./src/routers/userRoutes');
 const goalRoutes=require('./src/routers/goalRoutes');
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5050;
 
 dotenv.config();
 connectDB();
@@ -32,6 +32,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server listening on port ${PORT}`);
 });
