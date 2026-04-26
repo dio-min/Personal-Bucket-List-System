@@ -41,31 +41,84 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
+// const loginUser = asyncHandler(async (req, res) => {
+//   const { uid, email } = req.body;
+
+//   // Optional: Find user in MongoDB
+//   let user = await User.findOne({ firebaseUid: uid });
+
+//   if (!user) {
+//     // First time login after register → create profile if needed
+//     user = new User({
+//       username: email.split('@')[0], // temporary username
+//       email,
+//       firebaseUid: uid
+//     });
+//     await user.save();
+//   }
+
+//   res.status(200).json({
+//     message: "Login successful",
+//     user: {
+//       id: user._id,
+//       username: user.username,
+//       email: user.email,
+//       firebaseUid: user.firebaseUid
+//     }
+//   });
+// });
+
 const loginUser = asyncHandler(async (req, res) => {
   const { uid, email } = req.body;
 
-  // Optional: Find user in MongoDB
-  let user = await User.findOne({ firebaseUid: uid });
+  console.log("=== LOGIN REQUEST RECEIVED ===");
+  console.log("UID:", uid);
+  console.log("Email:", email);
 
-  if (!user) {
-    // First time login after register → create profile if needed
-    user = new User({
-      username: email.split('@')[0], // temporary username
-      email,
-      firebaseUid: uid
-    });
-    await user.save();
+  if (!uid || !email) {
+    return res.status(400).json({ message: "UID and email are required" });
   }
 
-  res.status(200).json({
-    message: "Login successful",
-    user: {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      firebaseUid: user.firebaseUid
+  try {
+    let user = await User.findOne({ firebaseUid: uid });
+
+    if (!user) {
+      console.log("→ Creating NEW user...");
+      user = new User({
+        username: email.split('@')[0], 
+        email,
+        firebaseUid: uid
+      });
+
+      const savedUser = await user.save();
+      console.log("✅ NEW USER SAVED SUCCESSFULLY:", savedUser._id);
+    } else {
+      console.log("→ Existing user found:", user._id);
+      // Update email if it changed
+      if (user.email !== email) {
+        user.email = email;
+        await user.save();
+        console.log("✅ User email updated");
+      }
     }
-  });
+
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        firebaseUid: user.firebaseUid
+      }
+    });
+  } catch (err) {
+    console.error("❌ LOGIN / SAVE ERROR:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ 
+      message: "Database error during login", 
+      error: err.message 
+    });
+  }
 });
 
 
