@@ -10,12 +10,13 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     
-
+    setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -38,6 +39,9 @@ function Login() {
     } catch (err) {
       console.error("Login error:", err);
       alert(err.message || "Invalid email or password");
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -75,9 +79,10 @@ function Login() {
                 required
               />
               <Link to={"/forgotpassword"}>Forgot password</Link>
-              <button type="submit">Login</button>
+              <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+              
               <Link to="/register">
-                <button>Register</button>
+                <button  >Register</button>
               </Link>
             </form>
           </div>

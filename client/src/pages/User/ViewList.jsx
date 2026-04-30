@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  Firestore,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../../lib/firebase";
@@ -25,7 +26,7 @@ import axios from "axios";
 
 import AddItem from "./AddItem";
 import API_BASE_URL from "../../lib/config";
-import { Update } from "./Update";
+// import { Update } from "./Update";
 
 function ViewList() {
   const [goals, setGoals] = useState([]);
@@ -125,10 +126,12 @@ function ViewList() {
       // Clean data for UI display
       const goalDetails = {
         title: goal.title || "Untitled Goal",
+        firestoreDocId: goal.firestoreDocId || "N/A",
         description: goal.description || "No description provided",
         date: goal.date || "Not specified",
         category: goal.category || "Uncategorized",
         status: goal.status || "Pending",
+        
       };
 
       setSelectedGoal(goalDetails);
@@ -256,7 +259,7 @@ function ViewList() {
                       </AlertDialog>
 
                       {/* update button */}
-                      <Update title={goal.title} />
+                      
 
                       
                     </Table.Cell>
@@ -321,6 +324,7 @@ function ViewList() {
                   <Button style={{ display: "flex", justifySelf: "right" }}>
                     Mark As Done
                   </Button>
+                  {/* <Update id={selectedGoal.id} title={selectedGoal.firebaseUid} /> */}
                 </div>
               </div>
             ) : (
