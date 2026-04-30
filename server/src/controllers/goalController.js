@@ -72,13 +72,13 @@ const getbyTitle = asyncHandler(async (req, res) => {
   res.status(200).json({
     message: "Items retrieved successfully",
     items: items.map(item => ({
-      // title: item.title,
+      title: item.title,
       firestoreDocId: item.firestoreDocId,
       firebaseUid: item.firebaseUid,
-      // description: item.description,
-      // date: item.date,
-      // category: item.category,
-      // status: item.status,
+      description: item.description,
+      date: item.date,
+      category: item.category,
+      status: item.status,
       
   })) });
 
