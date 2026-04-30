@@ -79,6 +79,7 @@ const getbyTitle = asyncHandler(async (req, res) => {
       date: item.date,
       category: item.category,
       status: item.status,
+      id: item._id
       
   })) });
 

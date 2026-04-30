@@ -131,6 +131,7 @@ function ViewList() {
         date: goal.date || "Not specified",
         category: goal.category || "Uncategorized",
         status: goal.status || "Pending",
+          id: goal.id || "N/A"
         
       };
 
