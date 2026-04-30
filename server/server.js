@@ -8,7 +8,7 @@ const goalRoutes = require('./src/routers/goalRoutes');
 dotenv.config();
 
 // ✅ Use Render's PORT or fallback to 5050 for local development
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5050;
 
 connectDB();
 
