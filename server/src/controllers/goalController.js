@@ -87,7 +87,7 @@ const getbyTitle = asyncHandler(async (req, res) => {
 
 // update item by firestoreDocId
 const updateDocument = asyncHandler(async (req, res) => {
-  const { documentID, title, category } = req.body;
+const {documentID, title, category} = req.body;
 
   console.log("Incoming:", req.body);
 

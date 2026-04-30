@@ -26,7 +26,7 @@ import axios from "axios";
 
 import AddItem from "./AddItem";
 import API_BASE_URL from "../../lib/config";
-// import { Update } from "./Update";
+import { Update } from "./Update";
 
 function ViewList() {
   const [goals, setGoals] = useState([]);
@@ -131,7 +131,7 @@ function ViewList() {
         date: goal.date || "Not specified",
         category: goal.category || "Uncategorized",
         status: goal.status || "Pending",
-          id: goal.id || "N/A"
+        id: goal.id || "N/A"
         
       };
 
@@ -325,7 +325,7 @@ function ViewList() {
                   <Button style={{ display: "flex", justifySelf: "right" }}>
                     Mark As Done
                   </Button>
-                  {/* <Update id={selectedGoal.id} title={selectedGoal.firebaseUid} /> */}
+                  <Update id={selectedGoal.id} firebaseDocId={selectedGoal.firestoreDocId} />
                 </div>
               </div>
             ) : (
