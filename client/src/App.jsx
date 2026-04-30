@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import Welcome from "./pages/Welcome.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
-
+import ViewList from "./pages/User/ViewList.jsx";
+import Album from "./pages/User/Album.jsx";
 import "./App.css";
 
 
@@ -38,7 +39,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgotpassword" element={<ForgetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            
+            <Route path="/viewlist" element={<ViewList />} />
+            <Route path="/album" element={<Album />} />
           </Routes>
           
         </Router>

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import Navigate from "./User/Navigate";   // your component
-import ViewList from "./User/ViewList";   // your component
+import Navigate from "./User/Navigate"; // your component
+import ViewList from "./User/ViewList"; // your component
 import { useNavigate } from "react-router-dom";
+import { Button } from "@heroui/react";
 
 const auth = getAuth();
 
 function Dashboard() {
   const [username, setUsername] = useState("");
- const navigate = useNavigate();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -23,18 +25,20 @@ function Dashboard() {
 
     // Cleanup on unmount
     return () => unsubscribe();
-  }, []);   // ← Empty dependency array is correct here
-
-  
+  }, []); // ← Empty dependency array is correct here
 
   return (
     <div style={{ color: "white" }}>
       <Navigate />
 
       <div className="container">
-        <p>Welcome, {username } </p>
-
-        <ViewList />
+        <p>Welcome, {username} </p>
+        
+        
+          
+          
+          
+        
       </div>
     </div>
   );

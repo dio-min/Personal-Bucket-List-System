@@ -103,6 +103,7 @@ export const Update = ({  id,firebaseDocId }) => {
 
       console.log("Goal updated successfully!");
       alert("Goal updated successfully!");
+      window.location.reload();
       
     } catch (err) {
       console.error("Update error:", err);
