@@ -45,7 +45,7 @@ export const Completed = ({ id }) => {
   const handleComplete = async (e) => {
     try {
       const response = await axios.post(
-        `http://localhost:5050/api/goal/getItemByID`,
+        `${API_BASE_URL}/api/goal/getItemByID`,
         {
           dbid: id,
         },
@@ -83,7 +83,7 @@ export const Completed = ({ id }) => {
 
     try {
      const response = await axios.put(
-  `http://localhost:5050/api/goal/updateStatus`,
+  `${API_BASE_URL}/api/goal/updateStatus`,
   {
     dbid: id,
     status: "completed"
@@ -111,7 +111,7 @@ export const Completed = ({ id }) => {
     formData.append("image", image); // MUST match upload.single("image")
 
     const response = await axios.post(
-      `http://localhost:5050/api/complete/addComplete`,
+      `${API_BASE_URL}/api/complete/addComplete`,
       formData,
       {
         headers: {
