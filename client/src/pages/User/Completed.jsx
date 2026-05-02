@@ -5,9 +5,10 @@ import StarIcon from "@mui/icons-material/Star";
 
 import { onAuthStateChanged } from "firebase/auth";
 
-import API_BASE_URL from "../../lib/config";
+
 import axios from "axios";
 import { documentId } from "firebase/firestore";
+import API_BASE_URL from "../../lib/config";
 
 const labels = {
   0.5: "Useless",
