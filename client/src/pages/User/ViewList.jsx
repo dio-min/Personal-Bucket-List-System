@@ -63,7 +63,7 @@ function ViewList() {
       return;
     }
 
-    setLoading(true);
+  
     setError(null);
 
     const q = query(
@@ -82,11 +82,11 @@ function ViewList() {
         }));
 
         setGoals(goalsList);
-        setLoading(false);
+
       },
       (err) => {
         setError("Failed to load goals: " + err.message);
-        setLoading(false);
+  
       },
     );
 
@@ -159,84 +159,7 @@ function ViewList() {
   return (
     <>
       <Navigate />
-      {loading ? (
-        <div
-          className="flex gap-8"
-          style={{ margin: "auto", paddingTop: "30px", maxWidth: "1200px" }}
-        >
-          {/* Left Side - Table Area */}
-          <div className="flex-1 max-w-[720px] shadow-panel rounded-lg bg-transparent ">
-            {/* Search + Add Button */}
-            <div className="flex items-end gap-4 mb-8 shadow-panel rounded-lg bg-transparent">
-              <Skeleton className="h-11 w-[520px] rounded-2xl" />
-              <Skeleton className="h-11 w-11 rounded-2xl" />
-            </div>
-
-            {/* Table Container */}
-            <div className="bg-[#1f1f1f] border border-white/10 rounded-3xl overflow-hidden shadow-panel rounded-lg ">
-              {/* Table Header */}
-              <div className="grid grid-cols-12 px-6 py-4 border-b border-white/10 bg-black/40">
-                <div className="col-span-5">
-                  <Skeleton className="h-4 w-20 rounded" />
-                </div>
-                <div className="col-span-4">
-                  <Skeleton className="h-4 w-24 rounded" />
-                </div>
-                <div className="col-span-3 text-right">
-                  <Skeleton className="h-4 w-16 rounded ml-auto" />
-                </div>
-              </div>
-
-              {/* Table Body - Skeleton Rows */}
-              <div className="divide-y divide-white/10">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-12 px-6 py-5 items-center hover:bg-white/5"
-                  >
-                    {/* Title */}
-                    <div className="col-span-5">
-                      <Skeleton className="h-3 w-[85%] rounded-md" />
-                    </div>
-
-                    {/* Category */}
-                    <div className="col-span-4">
-                      <Skeleton className="h-5 w-28 rounded-md" />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="col-span-3 flex justify-end gap-3">
-                      <Skeleton className="h-5 w-8 rounded-xl" />
-                      <Skeleton className="h-5 w-8 rounded-xl" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Goal Details Card */}
-          <div>
-            <Card className="w-[420px] h-[520px] bg-[#1f1f1f] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-              <Card.Header className="px-6 py-5 border-b border-white/10">
-                <Skeleton className="h-7 w-40 rounded-lg" />
-              </Card.Header>
-
-              <Card.Content className="p-6 space-y-8">
-                {/* Placeholder content when nothing selected */}
-                <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                  <Skeleton className="h-6 w-6 rounded-full mb-4" />
-
-                  <Skeleton className="h-4 w-64 rounded mb-2" />
-                  <Skeleton className="h-4 w-52 rounded" />
-                </div>
-
-                {/* Optional: You can also show full skeleton details like in previous response */}
-              </Card.Content>
-            </Card>
-          </div>
-        </div>
-      ) : (
+      
         <div
           style={{
             display: "flex",
@@ -459,7 +382,7 @@ function ViewList() {
             </Card>
           </div>
         </div>
-      )}
+     
     </>
   );
 }

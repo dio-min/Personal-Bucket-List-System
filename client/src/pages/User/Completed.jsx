@@ -5,8 +5,14 @@ import StarIcon from "@mui/icons-material/Star";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
-
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 import axios from "axios";
 import { documentId } from "firebase/firestore";
@@ -36,56 +42,53 @@ export const Completed = ({ id, firebaseDocId }) => {
   const [notes, setNotes] = useState("");
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [preview, setPreview] = useState(null); // Image preview URL
-  
+
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [uid, setUid] = useState(null);
   const [goals, setGoals] = useState([]);
 
   // Get current user
-    useEffect(() => {
-      const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-        setUid(user?.uid ?? null);
-      });
-  
-      return () => unsubscribeAuth();
-    }, []);
-  
-    // Fetch user's goals
-    useEffect(() => {
-        if (!uid) {
-          setLoading(false);
-          return;
-        }
-    
-        const q = query(
-          collection(db, "bucketlist"),
-          where("firebaseUid", "==", uid)
-        );
-    
-        const unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            const goalsList = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            setGoals(goalsList);
-            setLoading(false);
-          },
-          (err) => {
-            console.error("Snapshot error:", err);
-            setError("Failed to load goals: " + err.message);
-            setLoading(false);
-          }
-        );
-    
-        return () => unsubscribe(); 
-      }, [uid]);
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setUid(user?.uid ?? null);
+    });
 
-      
+    return () => unsubscribeAuth();
+  }, []);
 
-    
+  // Fetch user's goals
+  useEffect(() => {
+    if (!uid) {
+      setLoading(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, "bucketlist"),
+      where("firebaseUid", "==", uid),
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const goalsList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setGoals(goalsList);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Snapshot error:", err);
+        setError("Failed to load goals: " + err.message);
+        setLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [uid]);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -95,9 +98,6 @@ export const Completed = ({ id, firebaseDocId }) => {
   };
   const handleComplete = async (e) => {
     try {
-
-      
-
       const response = await axios.post(
         `${API_BASE_URL}/api/goal/getItemByID`,
         {
@@ -125,7 +125,6 @@ export const Completed = ({ id, firebaseDocId }) => {
       setImage(null); // Clear image
       setPreview(null); // Clear preview
       setRating(0); // Reset rating
-      
     } catch (error) {
       console.error("get data error:", error);
       setError(error.response?.data?.message || "Failed to get goal");
@@ -134,56 +133,49 @@ export const Completed = ({ id, firebaseDocId }) => {
 
   const handlemarkAsDone = async (e) => {
     e.preventDefault();
-    setLoading(true); 
+    setLoading(true);
 
     if (rating === 0 || !date || notes.trim() === "" || !image) {
-  alert("Please fill in all fields and provide a rating.");
-  setLoading(false); // ✅ important
-  return;
-}
-    
+      alert("Please fill in all fields and provide a rating.");
+      setLoading(false); // ✅ important
+      return;
+    }
 
     try {
-      const goalstatus =doc(db, "bucketlist", firebaseDocId);
+      const goalstatus = doc(db, "bucketlist", firebaseDocId);
       await updateDoc(goalstatus, { status: "completed" });
       alert("Goal marked as completed in Firestore!");
-     const res = await axios.put(
-  `${API_BASE_URL}/api/goal/updateStatus`,
-  {
-    dbid: id,
-    status: "completed"
-  }
-);
+      const res = await axios.put(`${API_BASE_URL}/api/goal/updateStatus`, {
+        dbid: id,
+        status: "completed",
+      });
       console.log("Status update response:", res.data);
       alert("Goal marked as completed!");
-     
-    
-      
-    const formData = new FormData();
 
-    formData.append("title", selectedGoal.title);
-    formData.append("description", notes);
-    formData.append("date", date);
-    formData.append("itemID", id);
-    formData.append("rating", rating);
-    formData.append("image", image); // MUST match upload.single("image")
+      const formData = new FormData();
 
-    const response = await axios.post(
-      `${API_BASE_URL}/api/complete/addComplete`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      formData.append("title", selectedGoal.title);
+      formData.append("description", notes);
+      formData.append("date", date);
+      formData.append("itemID", id);
+      formData.append("rating", rating);
+      formData.append("image", image); // MUST match upload.single("image")
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/complete/addComplete`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      }
-    );
+      );
 
-    console.log("Complete submission response:", response.data);
-    alert("Goal marked as completed and journal entry saved!");
-    setLoading(false);
-    setIsOpen(false);
-    
-     
+      console.log("Complete submission response:", response.data);
+      alert("Goal marked as completed and journal entry saved!");
+      setLoading(false);
+      setIsOpen(false);
+      window.location.reload(); // Refresh to show changes
     } catch (error) {
       console.error("Error preparing form data:", error);
       alert("Failed to prepare data for submission");
@@ -191,8 +183,6 @@ export const Completed = ({ id, firebaseDocId }) => {
     } finally {
       setLoading(false);
     }
-    
-
   };
 
   return (
@@ -201,9 +191,9 @@ export const Completed = ({ id, firebaseDocId }) => {
       <Button
         className="bg-black text-white border border-neutral-700 hover:bg-neutral-900"
         onClick={() => {
-    setIsOpen(true);
-    handleComplete();
-  }}
+          setIsOpen(true);
+          handleComplete();
+        }}
       >
         Mark as done
       </Button>
@@ -301,25 +291,20 @@ export const Completed = ({ id, firebaseDocId }) => {
                           type="file"
                           accept="image/*"
                           onChange={handleFileChange}
-                          
                           className="hidden"
                         />
                       </label>
                     </div>
 
                     {/* Submit */}
-                    
-                
 
-                      
                     <Button
                       type="submit"
                       className="w-full bg-neutral-800 hover:bg-neutral-700 text-white"
                       onClick={handlemarkAsDone}
                       disabled={loading}
-                      
                     >
-                        {loading ? "Saving..." : "Save"}
+                      {loading ? "Saving..." : "Save"}
                     </Button>
                   </form>
                 </div>

@@ -17,6 +17,8 @@ import axios from "axios";
 export const Update = ({  id,firebaseDocId }) => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const[date, setDate] = useState("");
+  const[description, setDescription] = useState("");
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,6 +74,8 @@ export const Update = ({  id,firebaseDocId }) => {
       if (goalToEdit) {
         setTitle(goalToEdit.title || "");
         setCategory(goalToEdit.category || "");
+        setDate(goalToEdit.date || "");
+        setDescription(goalToEdit.description || "");
       }
     }
   }, [firebaseDocId, goals]);
@@ -90,6 +94,8 @@ export const Update = ({  id,firebaseDocId }) => {
       await updateDoc(goalRef, {
         title: title,
         category: category,
+        date: date,
+        description: description,
       });
 
       const response = await axios.put(
@@ -97,7 +103,9 @@ export const Update = ({  id,firebaseDocId }) => {
   {
     documentID: id,
     title: title,
-    category: category
+    category: category,
+    date: date,
+    description: description
   }
 );
 
@@ -116,18 +124,113 @@ export const Update = ({  id,firebaseDocId }) => {
 
   return (
     <>
-      <Modal>
+    <Modal>
+      {/* Trigger */}
+      <Button variant="default">
+        Edit
+      </Button>
+
+      {/* Backdrop */}
+      <Modal.Backdrop className="bg-black/80 backdrop-blur-sm">
+        <Modal.Container className="flex items-center justify-center min-h-screen px-4">
+          <Modal.Dialog className="w-full max-w-lg p-6 bg-black border border-neutral-800 rounded-2xl shadow-xl text-neutral-100">
+
+            <Modal.CloseTrigger />
+
+            <Modal.Header>
+              <Modal.Heading className="text-lg font-semibold text-white">
+                Update Goal
+              </Modal.Heading>
+            </Modal.Header>
+
+            <Modal.Body>
+              <form onSubmit={handleUpdate} className="space-y-5">
+
+                <div>
+                  <label className="text-sm text-white-500">
+                    Goal Title
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Goal Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="text-sm text-white-500">
+                    Description
+                  </label>
+                  <textarea
+                    placeholder="Description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 placeholder-neutral-600 h-20 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="text-sm text-white-500">Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="text-sm text-white-500">
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 focus:outline-none focus:border-blue-600"
+                  >
+                    <option value="" className="text-white-600">
+                      Select a category
+                    </option>
+                    <option value="Travel">Travel</option>
+                    <option value="Health">Health</option>
+                    <option value="Career">Career</option>
+                    <option value="Personal">Personal</option>
+                  </select>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-blue-800 hover:bg-blue-900 disabled:bg-neutral-900 rounded-md font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
+                >
+                  Update Goal
+                </button>
+
+              </form>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
+    
+      {/* <Modal>
         <Button>Update Goal</Button>
-        <Modal.Backdrop>
+        <Modal.Backdrop className="bg-black/80 backdrop-blur-sm">
           <Modal.Container>
-            <Modal.Dialog>
+            <Modal.Dialog className={`p-6 bg-black border border-neutral-800 rounded-2xl shadow-xl text-neutral-100 transition-all`}>
               <Modal.CloseTrigger/>
               <Modal.Header>
-                <Modal.Heading>Update Goal</Modal.Heading>
+                <Modal.Heading className="text-white text-lg">Update Goal</Modal.Heading>
               </Modal.Header>
 
               <Modal.Body>
-                <form onSubmit={handleUpdate} className="space-y-4">
+                <form onSubmit={handleUpdate} className="display-flex flex-col gap-4">
                   <Input
                     label="Title"
                     value={title}
@@ -137,12 +240,27 @@ export const Update = ({  id,firebaseDocId }) => {
                   />
 
                   <Input
+                    label="Description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter description"
+                    required
+                  />
+                  <Input
+                    label="Date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    placeholder="Enter date"
+                    required
+                  />
+                  <Input
                     label="Category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     placeholder="Enter category"
                     required
                   />
+                  
 
                   <div className="flex justify-end gap-2 pt-4">
                     <Button type="button" variant="ghost" slot="close">
@@ -155,7 +273,7 @@ export const Update = ({  id,firebaseDocId }) => {
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
-      </Modal>
+      </Modal> */}
     </>
   );
 };
