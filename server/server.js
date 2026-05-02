@@ -4,6 +4,8 @@ const connectDB = require('./src/database/database');
 const cors = require('cors');
 const userRoutes = require('./src/routers/userRoutes');
 const goalRoutes = require('./src/routers/goalRoutes');
+const completeRoutes = require('./src/routers/completeRoutes');
+const path = require("path");
 
 dotenv.config();
 
@@ -25,8 +27,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use('/api/user', userRoutes);
 app.use('/api/goal', goalRoutes);
+app.use('/api/complete', completeRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

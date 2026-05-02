@@ -116,9 +116,66 @@ const {documentID, title, category} = req.body;
   }
 });
 
+const getItembyID = asyncHandler(async (req, res) => {
+  const { dbid } = req.body;
+
+  let items = await Item.find({ _id: dbid });
+
+  if (items.length === 0) {
+    return res.status(404).json({ message: 'No items found with the given ID.' });
+  }
+
+  if (!dbid) {
+    return res.status(400).json({ message: 'ID is required.' });
+  }
+
+  res.status(200).json({
+    message: "Items retrieved successfully",
+    items: items.map(item => ({
+      title: item.title,
+      
+      status: item.status,
+      
+      
+  })) });
+
+
+  
+
+});
+
+const updateStatus = asyncHandler(async (req, res) => {
+const {dbid, status} = req.body;
+
+  console.log("Incoming:", req.body);
+
+  if (!dbid) {
+    return res.status(400).json({ message: "dbid is required" });
+  }
+
+  try {
+    const updatedItem = await Item.findByIdAndUpdate(
+      dbid, // ✅ correct ID
+      { status }, // ✅ direct fields
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    console.log("✅ Updated:", updatedItem._id);
+
+    res.json(updatedItem); // ✅ SEND RESPONSE
+
+  } catch (error) {
+    console.error("❌ Update error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 
 module.exports = {
-    addItem, getbyTitle, updateDocument
+    addItem, getbyTitle, updateDocument, getItembyID, updateStatus
 };

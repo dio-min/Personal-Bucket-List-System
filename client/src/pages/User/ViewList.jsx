@@ -29,6 +29,7 @@ import { Skeleton, Dropdown } from "@heroui/react";
 import AddItem from "./AddItem";
 import API_BASE_URL from "../../lib/config";
 import { Update } from "./Update";
+import {Completed} from "./Completed";
 
 function ViewList() {
   const [goals, setGoals] = useState([]);
@@ -105,7 +106,7 @@ function ViewList() {
   const viewGoalDetails = async (title) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/goal/getitemsByTitle`,
+        `${API_BASE_URL}/api/goal/getItemsByTitle`,
         {
           title: title,
         },
@@ -413,9 +414,8 @@ function ViewList() {
                 </div>
 
                 <div>
-                  <Button style={{ display: "flex", justifySelf: "right" }}>
-                    Mark As Done
-                  </Button>
+                  <Completed id={selectedGoal.id} />
+                  
                   <Update
                     id={selectedGoal.id}
                     firebaseDocId={selectedGoal.firestoreDocId}
