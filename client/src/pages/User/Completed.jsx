@@ -4,6 +4,8 @@ import Rating from "@mui/material/Rating";
 import StarIcon from "@mui/icons-material/Star";
 
 import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../../lib/firebase";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 
 import axios from "axios";
@@ -27,15 +29,63 @@ function capitalizeFirstLetter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export const Completed = ({ id }) => {
+export const Completed = ({ id, firebaseDocId }) => {
   const [image, setImage] = useState(null);
   const [rating, setRating] = useState(0);
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [preview, setPreview] = useState(null); // Image preview URL
-  const [status, setStatus] = useState("");
+  
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [uid, setUid] = useState(null);
+  const [goals, setGoals] = useState([]);
 
+  // Get current user
+    useEffect(() => {
+      const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        setUid(user?.uid ?? null);
+      });
+  
+      return () => unsubscribeAuth();
+    }, []);
+  
+    // Fetch user's goals
+    useEffect(() => {
+        if (!uid) {
+          setLoading(false);
+          return;
+        }
+    
+        const q = query(
+          collection(db, "bucketlist"),
+          where("firebaseUid", "==", uid)
+        );
+    
+        const unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const goalsList = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setGoals(goalsList);
+            setLoading(false);
+          },
+          (err) => {
+            console.error("Snapshot error:", err);
+            setError("Failed to load goals: " + err.message);
+            setLoading(false);
+          }
+        );
+    
+        return () => unsubscribe(); 
+      }, [uid]);
+
+      
+
+    
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -45,6 +95,9 @@ export const Completed = ({ id }) => {
   };
   const handleComplete = async (e) => {
     try {
+
+      
+
       const response = await axios.post(
         `${API_BASE_URL}/api/goal/getItemByID`,
         {
@@ -72,7 +125,7 @@ export const Completed = ({ id }) => {
       setImage(null); // Clear image
       setPreview(null); // Clear preview
       setRating(0); // Reset rating
-      setStatus(goal.status || "Pending"); // Set status from goal
+      
     } catch (error) {
       console.error("get data error:", error);
       setError(error.response?.data?.message || "Failed to get goal");
@@ -81,27 +134,31 @@ export const Completed = ({ id }) => {
 
   const handlemarkAsDone = async (e) => {
     e.preventDefault();
+    setLoading(true); 
+
+    if (rating === 0 || !date || notes.trim() === "" || !image) {
+  alert("Please fill in all fields and provide a rating.");
+  setLoading(false); // ✅ important
+  return;
+}
+    
 
     try {
-     const response = await axios.put(
+      const goalstatus =doc(db, "bucketlist", firebaseDocId);
+      await updateDoc(goalstatus, { status: "completed" });
+      alert("Goal marked as completed in Firestore!");
+     const res = await axios.put(
   `${API_BASE_URL}/api/goal/updateStatus`,
   {
     dbid: id,
     status: "completed"
   }
 );
-      console.log("Status update response:", response.data);
+      console.log("Status update response:", res.data);
       alert("Goal marked as completed!");
+     
+    
       
-    } catch (error) {
-      console.error("Status update error:", error);
-      alert("Failed to update status");
-    }
-    try {
-      if (rating === 0|| !date || notes.trim() === "" || !image || notes === "") {
-        alert("Please fill in all fields and provide a rating.");
-        return;
-      }
     const formData = new FormData();
 
     formData.append("title", selectedGoal.title);
@@ -123,20 +180,30 @@ export const Completed = ({ id }) => {
 
     console.log("Complete submission response:", response.data);
     alert("Goal marked as completed and journal entry saved!");
+    setLoading(false);
+    setIsOpen(false);
+    
+     
     } catch (error) {
       console.error("Error preparing form data:", error);
       alert("Failed to prepare data for submission");
       return;
+    } finally {
+      setLoading(false);
     }
+    
 
   };
 
   return (
-    <Modal>
+    <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
       {/* Trigger */}
       <Button
         className="bg-black text-white border border-neutral-700 hover:bg-neutral-900"
-        onClick={handleComplete}
+        onClick={() => {
+    setIsOpen(true);
+    handleComplete();
+  }}
       >
         Mark as done
       </Button>
@@ -161,7 +228,7 @@ export const Completed = ({ id }) => {
               <div className="flex flex-col md:flex-row gap-6">
                 {/* LEFT SIDE (FORM) */}
                 <div className="flex-1">
-                  <form onSubmit={handleComplete} className="space-y-5">
+                  <form onSubmit={handlemarkAsDone} className="space-y-5">
                     {selectedGoal && (
                       <h1 className="text-lg font-semibold text-white text-center">
                         {capitalizeFirstLetter(selectedGoal.title)}
@@ -241,12 +308,18 @@ export const Completed = ({ id }) => {
                     </div>
 
                     {/* Submit */}
+                    
+                
+
+                      
                     <Button
                       type="submit"
                       className="w-full bg-neutral-800 hover:bg-neutral-700 text-white"
                       onClick={handlemarkAsDone}
+                      disabled={loading}
+                      
                     >
-                      Save
+                        {loading ? "Saving..." : "Save"}
                     </Button>
                   </form>
                 </div>

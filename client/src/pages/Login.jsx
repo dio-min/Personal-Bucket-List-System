@@ -79,7 +79,8 @@ function Login() {
                 required
               />
               <Link to={"/forgotpassword"}>Forgot password</Link>
-              <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+              <button type="submit" disabled={loading}>
+                {loading ? "Logging in..." : "Login"}</button>
               
               <Link to="/register">
                 <button  >Register</button>
