@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { use } from 'react'
 import Sample from '../../../assets/sample.png';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { useState, useEffect } from 'react';
 import { auth, db } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import API_BASE_URL from "../../../lib/config";
+import axios from "axios";
 
 function DisplayComplete() {
     const [items, setItems] = useState([]);
@@ -22,15 +24,19 @@ function DisplayComplete() {
     
             const fetchData = async () => {
                 try {
-                    const response = await fetch(`/api/complete/getCompleteByUser/${uid}`);
-                    const data = await response.json();
-                    setItems(data);
+                    const response = await axios.post(`${API_BASE_URL}/api/complete/getCompleteByUser`, {
+                         firebaseUid: uid ,
+                    }
+                    );
+                    setItems(response.data);
                 } catch (error) {
                     console.error("Error fetching completed items:", error);
                 }
             };
             fetchData();
         }, [uid]);
+        
+        
 
 
     
@@ -41,13 +47,14 @@ function DisplayComplete() {
     <div className="flex justify-center ">
         
         <ImageList sx={{ width: 700, height: 550, backgroundColor: 'black', padding:"10px", borderRadius: '10px' }} cols={3} rowHeight={350}>
-      {itemData.map((item) => (
-        <ImageListItem key={item.img}>
+      {items.map((item) => (
+        <ImageListItem key={item.id}>
           <img
-            srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-            src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
+            srcSet={`${item.imageUrl}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+            src={`${item.imageUrl}?w=164&h=164&fit=crop&auto=format`}
             alt={item.title}
-            loading="lazy"
+            loading="eager"
+            decoding="sync"
           />
         </ImageListItem>
       ))}

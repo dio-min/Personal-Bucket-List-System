@@ -29,7 +29,7 @@ const addComplete = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Image file is required" });
   }
 
-  const imageUrl = req.file.path;
+  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
   const parsedDate = new Date(date);
 
   if (isNaN(parsedDate.getTime())) {
@@ -59,6 +59,31 @@ const addComplete = asyncHandler(async (req, res) => {
   }
 });
 
+const getCompleteByUser = asyncHandler(async (req, res) => {
+  const { firebaseUid } = req.body;
+
+  try {
+    const completes = await Complete.find({ firebaseUid: firebaseUid }).sort({ createdAt: -1 });
+
+    return res.status(200).json(
+      completes.map((complete) => ({
+        id: complete._id,
+        title: complete.title,
+        description: complete.description,
+        date: complete.date,
+        imageUrl: complete.imageUrl,
+        itemID: complete.itemID,
+        rating: complete.rating,
+        firebaseUid: complete.firebaseUid,
+      }))
+    );
+  } catch (error) {
+    console.error("❌ Error fetching completes:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 module.exports = {
   addComplete,
+  getCompleteByUser,
 };
