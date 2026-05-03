@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { db, auth } from "../../lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 import { Button, Modal } from "@heroui/react";
 import { CirclePlusFill } from "@gravity-ui/icons";
@@ -48,6 +48,7 @@ function AddItem() {
         createdAt: new Date(),
         status: "in-progress",
         firebaseUid,
+        createdAt: serverTimestamp(),
       });
 
       await axios.post(`${API_BASE_URL}/api/goal/addItem`, {

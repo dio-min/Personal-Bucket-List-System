@@ -9,6 +9,7 @@ import {
   doc,
   updateDoc,
   Firestore,
+  orderBy,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../../lib/firebase";
@@ -70,6 +71,7 @@ function ViewList() {
       collection(db, "bucketlist"),
       where("firebaseUid", "==", uid),
       where("status", "==", "in-progress"),
+      orderBy("createdAt", "desc") 
       
     );
 
