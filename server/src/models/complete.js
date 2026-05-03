@@ -24,6 +24,10 @@ const completeSchema = new mongoose.Schema({
     min: [0, 'Rating must be at least 0'],
     max: [5, 'Rating cannot exceed 5']
     },
+    firebaseUid: {
+    type: String,
+    required: [true, 'Firebase UID is required']
+    },
   }
     , { timestamps: true });
 

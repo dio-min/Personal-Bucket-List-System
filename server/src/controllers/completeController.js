@@ -4,7 +4,7 @@ const asyncHandler = require("express-async-handler");
 
 
 const addComplete = asyncHandler(async (req, res) => {
-  const { title, description, date, itemID, rating } = req.body;
+  const { title, description, date, itemID, rating, firebaseUid } = req.body;
 
   console.log("📥 Received Body:", req.body);     // ← Add this
   console.log("📸 Received File:", req.file);     // ← Add this
@@ -15,12 +15,13 @@ const addComplete = asyncHandler(async (req, res) => {
   if (!date) missing.push("date");
   if (!itemID) missing.push("itemID");
   if (rating === undefined || rating === null) missing.push("rating");
+  if (!firebaseUid) missing.push("firebaseUid");
 
   if (missing.length > 0) {
     return res.status(400).json({
       message: "Missing fields",
       missingFields: missing,
-      received: { title, description, date, itemID, rating }
+      received: { title, description, date, itemID, rating, firebaseUid }
     });
   }
 
@@ -43,6 +44,7 @@ const addComplete = asyncHandler(async (req, res) => {
       imageUrl,
       itemID,
       rating: Number(rating),        // Ensure it's a number
+      firebaseUid,
     });
 
     await newComplete.save();

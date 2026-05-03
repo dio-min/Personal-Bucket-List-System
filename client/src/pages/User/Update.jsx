@@ -17,8 +17,8 @@ import axios from "axios";
 export const Update = ({  id,firebaseDocId }) => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const[date, setDate] = useState("");
-  const[description, setDescription] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

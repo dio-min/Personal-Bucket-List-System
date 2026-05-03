@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @import "@heroui/styles"; 
+
+/* Hide scrollbar for all elements */
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+ /* IE + Edge */
+  scrollbar-width: none;     /* Firefox */
+}

@@ -42,6 +42,7 @@ export const Completed = ({ id, firebaseDocId }) => {
   const [notes, setNotes] = useState("");
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [preview, setPreview] = useState(null); // Image preview URL
+  const firebaseUid = auth.currentUser?.uid || null;
 
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -160,6 +161,7 @@ export const Completed = ({ id, firebaseDocId }) => {
       formData.append("itemID", id);
       formData.append("rating", rating);
       formData.append("image", image); // MUST match upload.single("image")
+      formData.append("firebaseUid", firebaseUid);
 
       const response = await axios.post(
         `${API_BASE_URL}/api/complete/addComplete`,
