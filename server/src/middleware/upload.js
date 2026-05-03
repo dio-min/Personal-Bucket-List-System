@@ -1,29 +1,24 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, "src/uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
-
-    cb(
-      null,
-      file.fieldname + "-" + uniqueName + path.extname(file.originalname)
-    );
+// Replace diskStorage with CloudinaryStorage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "personal_bucketlist",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
+// Keep your existing fileFilter — no changes needed
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
@@ -32,12 +27,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
-  storage, 
+// Keep your existing upload config — no changes needed
+const upload = multer({
+  storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
 });
 
 module.exports = upload;

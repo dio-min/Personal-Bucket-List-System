@@ -29,7 +29,7 @@ const addComplete = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Image file is required" });
   }
 
-  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  const imageUrl = req.file.path; // Assuming the upload middleware saves the file and provides the path
   const parsedDate = new Date(date);
 
   if (isNaN(parsedDate.getTime())) {

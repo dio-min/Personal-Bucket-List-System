@@ -44,23 +44,21 @@ function DisplayComplete() {
 
     
   return (
-    <div className="flex justify-center ">
-        
-        <ImageList sx={{ width: 700, height: 550, backgroundColor: 'black', padding:"10px", borderRadius: '10px' }} cols={3} rowHeight={350}>
+  <div className="flex justify-center">
+    <ImageList sx={{ width: 700, height: 550, backgroundColor: 'black', padding: "10px", borderRadius: '10px' }} cols={3} rowHeight={350}>
       {items.map((item) => (
         <ImageListItem key={item.id}>
           <img
-            srcSet={`${item.imageUrl}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-            src={`${item.imageUrl}?w=164&h=164&fit=crop&auto=format`}
+            src={item.imageUrl}
             alt={item.title}
             loading="eager"
-            decoding="sync"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </ImageListItem>
       ))}
     </ImageList>
-    </div>
-  )
+  </div>
+)
 }
 const itemData = [
   {
