@@ -2,16 +2,14 @@ const User = require('../models/User');
 const asyncHandler = require("express-async-handler");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, uid, profilePicture, isdeleted } = req.body;   // uid from Firebase
+  const { username, email, uid, profilePicture, isdeleted } = req.body;
 
   console.log("🔹 Registration request received:", { username, email, hasUid: !!uid });
 
-  // Validation
   if (!username || !email) {
     return res.status(400).json({ error: 'Username and email are required' });
   }
 
-  // Check if user already exists
   const existingUser = await User.findOne({ 
     $or: [{ email }, { username }] 
   });
@@ -20,13 +18,12 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Username or email already exists' });
   }
 
-  // Create user in MongoDB (NO password, since Firebase handles auth)
   const newUser = new User({
     username,
     email,
-    firebaseUid: uid || null,   // Link to Firebase user
+    firebaseUid: uid || null,
     profilePicture: profilePicture || null,
-    isDeleted: isdeleted,   // Use provided profile picture or default
+    isDeleted: isdeleted,
   });
 
   await newUser.save();
@@ -47,13 +44,11 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { uid, email } = req.body;
 
-  // Optional: Find user in MongoDB
   let user = await User.findOne({ firebaseUid: uid });
 
   if (!user) {
-    // First time login after register → create profile if needed
     user = new User({
-      username: email.split('@')[0], // temporary username
+      username: email.split('@')[0],
       email,
       firebaseUid: uid
     });
@@ -119,9 +114,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   });
 });
 
+const updateUserName = asyncHandler(async (req, res) => {
+  const { uid, username } = req.body;
 
-const updateUserName = asyncHandler(async (req, res)=>{
-  const {uid, username} = req.body;
   if (!uid) {
     return res.status(400).json({ error: 'User UID is required' });
   }
@@ -129,35 +124,57 @@ const updateUserName = asyncHandler(async (req, res)=>{
     return res.status(400).json({ error: 'Username is required' });
   }
 
-
   const user = await User.findOneAndUpdate(
-    {firebaseUid:uid},
-    {username: username},
-    {new: true}
+    { firebaseUid: uid },
+    { username: username },
+    { new: true }
   );
 
   res.status(200).json({
-    message:'Username updated successfully',
+    message: 'Username updated successfully',
     username: user.username,
-  })
-
+  });
 });
 
-
-const handleisDeleted = asyncHandler(async(req, res)=>{
-  const {uid, isdelete} = req.body;
+const handleisDeleted = asyncHandler(async (req, res) => {
+  const { uid, isdelete } = req.body;
 
   const user = await User.findOneAndUpdate(
-    {firebaseUid: uid},
-    {isDeleted: isdelete},
-    {new: true}
-  )
+    { firebaseUid: uid },
+    { isDeleted: isdelete },
+    { new: true }
+  );
 
   res.status(200).json({
-    message:'User deleted successfully',
+    message: 'User deleted successfully',
     isDeleted: user.isDeleted,
-  })
-})
+  });
+});
 
+// FIX: Replaced Firestore implementation (db.collection) with Mongoose to match
+// the rest of the file. Also wrapped with asyncHandler and added to exports.
+const getEmailByUsername = asyncHandler(async (req, res) => {
+  const { username } = req.body;
 
-module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName, handleisDeleted };   // or module.exports = registerUser;
+  if (!username || typeof username !== "string" || !username.trim()) {
+    return res.status(400).json({ message: "Username is required." });
+  }
+
+  const user = await User.findOne({ username: username.trim() });
+
+  if (!user || !user.email) {
+    return res.status(404).json({ message: "No account found with that username." });
+  }
+
+  return res.status(200).json({ email: user.email });
+});
+
+module.exports = {
+  loginUser,
+  registerUser,
+  getUserProfile,
+  updateUserProfile,
+  updateUserName,
+  handleisDeleted,
+  getEmailByUsername, // ← added to exports
+};

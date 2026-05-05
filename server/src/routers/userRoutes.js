@@ -4,7 +4,7 @@ const upload = require('../middleware/upload');
 
 const { loginUser, registerUser } = require('./../controllers/userController');   
 
-const { getUserProfile, updateUserProfile, updateUserName, handleisDeleted } = require('../controllers/userController');
+const { getUserProfile, updateUserProfile, updateUserName, handleisDeleted, getEmailByUsername } = require('../controllers/userController');
 
 
 
@@ -21,4 +21,5 @@ router.post('/profile', getUserProfile);
 router.post('/uploadAvatar', upload.single("avatar"),handleUploadError, updateUserProfile);
 router.post('/username', updateUserName);
 router.post('/isdeleted', handleisDeleted);
+router.post('/get-email-by-username', getEmailByUsername);
 module.exports = router;
