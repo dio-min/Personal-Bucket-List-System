@@ -381,9 +381,7 @@ function Profile() {
                 <Dropdown.Item onPress={() => fileInputRef.current?.click()}>
                   <Label>Change Avatar</Label>
                 </Dropdown.Item>
-                <Dropdown.Item>
-                  <Label>Add Bio</Label>
-                </Dropdown.Item>
+                
                 <Dropdown.Item
                   variant="danger"
                   onPress={() => setShowDeleteModal(true)}
