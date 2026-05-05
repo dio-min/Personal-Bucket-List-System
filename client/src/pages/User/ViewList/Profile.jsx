@@ -15,6 +15,7 @@ function Profile() {
   const [items, setItems] = useState([]);
   const [uid, setUid] = useState(null);
   const [badges, setBadges] = useState(""); // Fix 1: was [], should be ""
+  const [userAvatar, setUserAvatar] = useState(null); // New state for avatar
 
   const navigate = useNavigate();
 
@@ -31,6 +32,23 @@ function Profile() {
     });
     return () => unsubscribe();
   }, [navigate]); // Fix 4: added navigate to deps
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/api/user/profile`, { uid: uid });
+        console.log("User profile response:", response.data);
+       
+        setUserAvatar(response.data.user.profilePicture);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    if (uid) {
+      getUserProfile();
+    }
+  }, [uid]);
 
   useEffect(() => {
     if (!uid) return;
@@ -78,8 +96,13 @@ function Profile() {
         className="flex p-4 rounded-lg w-150"
         style={{ backgroundColor: "black", border: "1px solid #333" }}
       >
-        <div className="w-20 h-18 rounded-full bg-gray-800 flex items-center justify-center mr-4">
-          <PersonFill className="size-13" />
+        <div >
+        
+            <img
+              src={userAvatar}
+              alt="User Avatar"
+              className="w-full h-full rounded-full object-cover"
+            />
         </div>
         <div className="flex justify-between items-start w-full">
           <div>

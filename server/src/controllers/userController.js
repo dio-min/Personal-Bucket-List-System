@@ -70,6 +70,26 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getUserProfile = asyncHandler(async (req, res) => {
+  const { uid } = req.params;
+  const user = await User.findOne({ firebaseUid: uid });
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.status(200).json({
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      firebaseUid: user.firebaseUid,
+      profilePicture: user.profilePicture
+    }
+  });
+});
+
 // const updateUsername = asyncHandler(async (req, res) => {
 //   const { uid } = req.body;
 //   const { newUsername } = req.body;
@@ -126,4 +146,4 @@ const loginUser = asyncHandler(async (req, res) => {
 //   });
 // });
 
-module.exports = { loginUser, registerUser };   // or module.exports = registerUser;
+module.exports = { loginUser, registerUser, getUserProfile };   // or module.exports = registerUser;
