@@ -129,7 +129,7 @@ function Profile() {
       await updateProfile(auth.currentUser, {
         displayName: newUsername,
       });
-      await axios.post(`${API_BASE_URL}/api/username`, {
+      await axios.post(`${API_BASE_URL}/api/user/username`, {
         uid: uid,
         username: newUsername,
       });
