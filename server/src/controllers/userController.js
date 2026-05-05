@@ -70,7 +70,6 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 const getUserProfile = asyncHandler(async (req, res) => {
   const { uid } = req.body;
   const user = await User.findOne({ firebaseUid: uid });
@@ -85,7 +84,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
     }
   });
 });
-
 
 const updateUserProfile = asyncHandler(async (req, res) => {
   const { uid } = req.body;
@@ -121,5 +119,29 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 });
 
 
+const updateUserName = asyncHandler(async (req, res)=>{
+  const uid, username = req.body;
+  if (!uid) {
+    return res.status(400).json({ error: 'User UID is required' });
+  }
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
 
-module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile };   // or module.exports = registerUser;
+
+  const user = await User.findOneAndUpdate(
+    {firebaseUid:uid},
+    {username: username},
+    {new: true}
+  );
+
+  res.status(200).json({
+    message:'Username updated successfully',
+    username: user.username,
+  })
+
+});
+
+
+
+module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName };   // or module.exports = registerUser;
