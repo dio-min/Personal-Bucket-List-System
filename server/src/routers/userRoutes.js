@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../middleware/upload');
+
 const { loginUser, registerUser } = require('./../controllers/userController');   
-// const { updateUsername } = require('../controllers/userController'); 
-const getUserProfile = require('../controllers/userController').getUserProfile;
+
+const { getUserProfile, updateUserProfile } = require('../controllers/userController');
+
+
+
+const handleUploadError = (err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ message: err.message || "File upload error" });
+  }
+  next();
+};
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/profile', getUserProfile);
-// router.put('/updateUsername', updateUsername);
+router.post('/uploadAvatar', upload.single("avatar"),handleUploadError, updateUserProfile);
 
 module.exports = router;

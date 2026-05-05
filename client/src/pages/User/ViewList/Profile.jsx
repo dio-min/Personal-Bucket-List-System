@@ -1,6 +1,5 @@
-import { PersonFill } from "@gravity-ui/icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../../../lib/config";
 import axios from "axios";
@@ -14,12 +13,16 @@ function Profile() {
   const [newUsername, setNewUsername] = useState("");
   const [items, setItems] = useState([]);
   const [uid, setUid] = useState(null);
-  const [badges, setBadges] = useState(""); // Fix 1: was [], should be ""
-  const [userAvatar, setUserAvatar] = useState(null); // New state for avatar
+  const [badges, setBadges] = useState("");
+  const [userAvatar, setUserAvatar] = useState(null);
+  const [image, setImage] = useState(null);         // the actual File object
+  const [preview, setPreview] = useState(null);     // local blob URL for preview
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);     
+  const [showAvatarModal, setShowAvatarModal] = useState(false);           // hidden file input ref
 
   const navigate = useNavigate();
 
-  // Fix 3: Consolidated into one auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -31,15 +34,21 @@ function Profile() {
       }
     });
     return () => unsubscribe();
-  }, [navigate]); // Fix 4: added navigate to deps
+  }, [navigate]);
 
+  // LEFT UNTOUCHED
   useEffect(() => {
     const getUserProfile = async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/user/profile`, { uid: uid });
+        const response = await axios.post(
+          `http://localhost:5050/api/user/profile`,
+          {
+            uid: uid,
+          },
+        );
         console.log("User profile response:", response.data);
-       
-        setUserAvatar(response.data.user.profilePicture);
+        const avatarUrl = response.data.user.profilePicture;
+        setUserAvatar(avatarUrl);
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -66,49 +75,134 @@ function Profile() {
     fetchData();
   }, [uid]);
 
-  // Fix 2: Use >= so badges are earned and kept as count grows
   useEffect(() => {
-    if (items.length >= 25) {
-      setBadges("Adventurer");
-    } else if (items.length >= 10) {
-      setBadges("Explorer");
-    } else if (items.length >= 1) {
-      setBadges("First Step");
-    } else {
-      setBadges("");
-    }
+    if (items.length >= 25) setBadges("Adventurer");
+    else if (items.length >= 10) setBadges("Explorer");
+    else if (items.length >= 1) setBadges("First Step");
+    else setBadges("");
   }, [items]);
 
-  const handleUsernameChange = async () => {
-    try {
-      await axios.put(`${API_BASE_URL}/api/user/updateUsername`, {
-        uid: uid,
-        newUsername: newUsername,
-      });
-    } catch (error) {
-      console.error("Error updating username:", error);
-    }
-  };
+  // Triggered when user picks a file — shows preview immediately
+ const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setImage(file);
+  setPreview(URL.createObjectURL(file));
+  setShowAvatarModal(true); // open modal after picking
+};
+
+
+const handleUpload = async () => {
+  if (!image) return;
+  setUploading(true);
+  try {
+    const formData = new FormData();
+    formData.append("uid", uid);
+    formData.append("avatar", image);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/api/user/uploadAvatar`,
+      formData,
+    );
+
+    const newUrl = response.data?.profilePicture;
+    setUserAvatar(newUrl || preview);
+    setImage(null);
+    setPreview(null);
+    setShowAvatarModal(false); // close modal on success
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    alert("Failed to upload avatar. Please try again.");
+  } finally {
+    setUploading(false);
+  }
+};
+
+// Update handleCancelUpload to close modal
+const handleCancelUpload = () => {
+  setImage(null);
+  setPreview(null);
+  setShowAvatarModal(false); // close modal on cancel
+  if (fileInputRef.current) fileInputRef.current.value = "";
+};
 
   return (
     <div className="flex justify-center items-center mt-8">
+      {/* Hidden file input — triggered by "Change Avatar" menu item */}
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <div
         className="flex p-4 rounded-lg w-150"
         style={{ backgroundColor: "black", border: "1px solid #333" }}
       >
-        <div >
-        
-            <img
-              src={userAvatar}
-              alt="User Avatar"
-              className="w-full h-full rounded-full object-cover"
-            />
+        <div className="mr-5 flex flex-col items-center gap-2">
+          <img
+            src={userAvatar}
+            alt="User Avatar"
+            className="rounded-full object-cover"
+        style={{ border: "2px solid #333" }}
+          />
+          {/* Confirm/cancel buttons shown only when a new image is staged */}
+          {/* Avatar Upload Modal */}
+{showAvatarModal && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center"
+    style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+    onClick={handleCancelUpload} // click backdrop to dismiss
+  >
+    <div
+      className="flex flex-col items-center gap-4 p-6 rounded-xl"
+      style={{ backgroundColor: "#111", border: "1px solid #333", minWidth: "280px" }}
+      onClick={(e) => e.stopPropagation()} // prevent backdrop click from firing inside
+    >
+      <h3 className="text-white font-semibold text-base">Update Avatar</h3>
+
+      {/* Preview */}
+      <img
+        src={preview}
+        alt="Preview"
+        className="w-24 h-24 rounded-full object-cover"
+        style={{ border: "2px solid #333" }}
+      />
+
+      {/* Actions */}
+      <div className="flex gap-2 w-full">
+        <button
+          onClick={handleUpload}
+          disabled={uploading}
+          className="flex-1 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {uploading ? "Saving…" : "Save"}
+        </button>
+        <button
+          onClick={handleCancelUpload}
+          className="flex-1 py-2 rounded-lg text-white text-sm font-medium"
+          style={{ backgroundColor: "#333" }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         </div>
+
         <div className="flex justify-between items-start w-full">
           <div>
-            <h2 className="text-lg text-white " style={{fontSize:"20px"}}>{username}</h2>
+            <h2 className="text-lg text-white " style={{ fontSize: "20px" }}>
+              {username}
+            </h2>
             {badges && (
-              <p className="items-center px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium" style={{fontSize:"10px"}}>
+              <p
+                className="items-center px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium"
+                style={{ fontSize: "10px" }}
+              >
                 {badges}
               </p>
             )}
@@ -123,7 +217,12 @@ function Profile() {
                   <Dropdown.Item id="personal" textValue="personal">
                     <Label>Change Username</Label>
                   </Dropdown.Item>
-                  <Dropdown.Item id="career" textValue="career">
+                  {/* Fix: clicking this now opens the file picker */}
+                  <Dropdown.Item
+                    id="career"
+                    textValue="career"
+                    onPress={() => fileInputRef.current?.click()}
+                  >
                     <Label>Change Avatar</Label>
                   </Dropdown.Item>
                   <Dropdown.Item id="travel" textValue="travel">

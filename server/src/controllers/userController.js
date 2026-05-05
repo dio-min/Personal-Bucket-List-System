@@ -72,7 +72,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 const getUserProfile = asyncHandler(async (req, res) => {
-  const { uid } = req.params;
+  const { uid } = req.body;
   const user = await User.findOne({ firebaseUid: uid });
 
   if (!user) {
@@ -81,69 +81,45 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     user: {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      firebaseUid: user.firebaseUid,
       profilePicture: user.profilePicture
     }
   });
 });
 
-// const updateUsername = asyncHandler(async (req, res) => {
-//   const { uid } = req.body;
-//   const { newUsername } = req.body;
 
-//   if (!newUsername) {
-//     return res.status(400).json({ error: 'New username is required' });
-//   }
-//   const user = await User.findOneAndUpdate(
-//     { firebaseUid: uid },
-//     { username: newUsername },
-//     { new: true }
-//   );
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { uid } = req.body;
 
-//   if (!user) {
-//     return res.status(404).json({ error: 'User not found' });
-//   }
+  if (!uid) {
+    return res.status(400).json({ error: 'User UID is required' });
+  }
 
-//   res.status(200).json({
-//     message: 'Username updated successfully',
-//     user: {
-//       id: user._id,
-//       username: user.username,
-//       email: user.email,
-//       firebaseUid: user.firebaseUid
-//     }
-//   });
-// });
+  if (!req.file) {
+    return res.status(400).json({ error: 'Avatar file is required' });
+  }
 
-// const updateAvatar = asyncHandler(async (req, res) => {
-//   const { uid } = req.body;
-//   const { newAvatarUrl } = req.body;
-//   if (!newAvatarUrl) {
-//     return res.status(400).json({ error: 'New avatar URL is required' });
-//   }
-//   const user = await User.findOneAndUpdate(
-//     { firebaseUid: uid },
-//     { avatarUrl: newAvatarUrl },
-//     { new: true }
-//   );
+  const imageUrl = req.file.path || req.file.secure_url || null;
 
-//   if (!user) {
-//     return res.status(404).json({ error: 'User not found' });
-//   }
+  if (!imageUrl) {
+    return res.status(500).json({ error: 'Failed to determine avatar URL' });
+  }
 
-//   res.status(200).json({
-//     message: 'Avatar updated successfully',
-//     user: {
-//       id: user._id,
-//       username: user.username,
-//       email: user.email,
-//       firebaseUid: user.firebaseUid,
-//       avatarUrl: user.avatarUrl
-//     }
-//   });
-// });
+  const user = await User.findOneAndUpdate(
+    { firebaseUid: uid },
+    { profilePicture: imageUrl },
+    { new: true }
+  );
 
-module.exports = { loginUser, registerUser, getUserProfile };   // or module.exports = registerUser;
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.status(200).json({
+    message: 'Avatar uploaded successfully',
+    profilePicture: user.profilePicture,
+  });
+});
+
+
+
+module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile };   // or module.exports = registerUser;
