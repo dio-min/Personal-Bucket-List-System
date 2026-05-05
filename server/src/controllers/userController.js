@@ -25,7 +25,8 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     firebaseUid: uid || null,   // Link to Firebase user
-    profilePicture: profilePicture || null   // Use provided profile picture or default
+    profilePicture: profilePicture || null,
+    isDeleted,   // Use provided profile picture or default
   });
 
   await newUser.save();
@@ -143,5 +144,20 @@ const updateUserName = asyncHandler(async (req, res)=>{
 });
 
 
+const isDeleted = asyncHandler(async(req, res)=>{
+  const {uid} = req.body;
 
-module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName };   // or module.exports = registerUser;
+  const user = await User.findOneAndUpdate(
+    {firebaseUid: uid},
+    {isDeleted: true},
+    {new: true}
+  )
+
+  res.status(200).json({
+    message:'User deleted successfully',
+    isDeleted: user.isDeleted,
+  })
+})
+
+
+module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName, isDeleted };   // or module.exports = registerUser;

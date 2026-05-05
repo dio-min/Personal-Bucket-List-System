@@ -119,9 +119,6 @@ function Profile() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // FIX 1: Opens the correct modal (was incorrectly setting showAvatarModal)
-  // FIX 2: Awaits both async calls
-  // FIX 3: Updates the displayed username in state after success
   const handleUpdateUsername = async () => {
     if (!newUsername.trim()) return;
     setUploading(true);
@@ -141,6 +138,22 @@ function Profile() {
       setUploading(false);
     }
   };
+
+  const handleDeleteUser= async () =>{
+    try{
+     deleteUser(auth.currentUser);
+
+     const response = await axios.post(`${API_BASE_URL}/api/use/isdeleted`,{
+        uid:uid
+     })
+     console.log(response.data);
+     alert("User Deleted")
+
+    }
+    catch(error){
+      console.error("failed to delete user", error);
+    }
+  }
 
   return (
     <div className="flex justify-center items-center mt-8">
@@ -316,10 +329,8 @@ function Profile() {
                 <Dropdown.Item onPress={() => fileInputRef.current?.click()}>
                   <Label>Change Avatar</Label>
                 </Dropdown.Item>
-                <Dropdown.Item>
-                  <Label>Add Bio</Label>
-                </Dropdown.Item>
-                <Dropdown.Item>
+                
+                <Dropdown.Item variant="danger">
                   <Label>Delete Account</Label>
                 </Dropdown.Item>
               </Dropdown.Menu>
