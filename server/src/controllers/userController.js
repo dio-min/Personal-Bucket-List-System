@@ -2,7 +2,7 @@ const User = require('../models/User');
 const asyncHandler = require("express-async-handler");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, uid, profilePicture } = req.body;   // uid from Firebase
+  const { username, email, uid, profilePicture, isdeleted } = req.body;   // uid from Firebase
 
   console.log("🔹 Registration request received:", { username, email, hasUid: !!uid });
 
@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     firebaseUid: uid || null,   // Link to Firebase user
     profilePicture: profilePicture || null,
-    isDeleted,   // Use provided profile picture or default
+    isDeleted: isdeleted,   // Use provided profile picture or default
   });
 
   await newUser.save();
@@ -144,12 +144,12 @@ const updateUserName = asyncHandler(async (req, res)=>{
 });
 
 
-const isDeleted = asyncHandler(async(req, res)=>{
-  const {uid} = req.body;
+const handleisDeleted = asyncHandler(async(req, res)=>{
+  const {uid, isdelete} = req.body;
 
   const user = await User.findOneAndUpdate(
     {firebaseUid: uid},
-    {isDeleted: true},
+    {isDeleted: isdelete},
     {new: true}
   )
 
@@ -160,4 +160,4 @@ const isDeleted = asyncHandler(async(req, res)=>{
 })
 
 
-module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName, isDeleted };   // or module.exports = registerUser;
+module.exports = { loginUser, registerUser, getUserProfile, updateUserProfile, updateUserName, handleisDeleted };   // or module.exports = registerUser;

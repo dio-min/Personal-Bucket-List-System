@@ -45,7 +45,8 @@ function Register() {
           username,
           email,
           uid: firebaseUser.uid, // ← correct
-          profilePicture: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" // default profile picture
+          profilePicture: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" ,
+          isdeleted: false// default profile picture
         },
       );
       setEmail("");

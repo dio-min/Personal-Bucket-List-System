@@ -22,6 +22,7 @@ function Profile() {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
@@ -125,7 +126,7 @@ function Profile() {
   const handleDeleteUser = async () => {
     setDeleting(true);
     try {
-      await axios.post(`${API_BASE_URL}/api/user/isdeleted`, { uid });
+      await axios.post(`${API_BASE_URL}/api/user/isdeleted`, { uid: uid, isdelete:deleting });
       await deleteUser(auth.currentUser);
       navigate("/");
     } catch (error) {
