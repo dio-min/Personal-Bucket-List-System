@@ -120,7 +120,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 
 const updateUserName = asyncHandler(async (req, res)=>{
-  const uid, username = req.body;
+  const {uid, username} = req.body;
   if (!uid) {
     return res.status(400).json({ error: 'User UID is required' });
   }
