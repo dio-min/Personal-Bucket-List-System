@@ -2,7 +2,7 @@ const User = require('../models/User');
 const asyncHandler = require("express-async-handler");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, uid } = req.body;   // uid from Firebase
+  const { username, email, uid, profilePicture } = req.body;   // uid from Firebase
 
   console.log("🔹 Registration request received:", { username, email, hasUid: !!uid });
 
@@ -25,6 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     firebaseUid: uid || null,   // Link to Firebase user
+    profilePicture: profilePicture || null   // Use provided profile picture or default
   });
 
   await newUser.save();
@@ -36,7 +37,8 @@ const registerUser = asyncHandler(async (req, res) => {
     user: {
       id: newUser._id,
       username: newUser.username,
-      email: newUser.email
+      email: newUser.email,
+      profilePicture: newUser.profilePicture
     }
   });
 });
@@ -68,78 +70,60 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-// const loginUser = asyncHandler(async (req, res) => {
-//   const { uid, email } = req.body;
+// const updateUsername = asyncHandler(async (req, res) => {
+//   const { uid } = req.body;
+//   const { newUsername } = req.body;
 
-//   console.log("=== LOGIN REQUEST RECEIVED ===");
-//   console.log("UID:", uid);
-//   console.log("Email:", email);
+//   if (!newUsername) {
+//     return res.status(400).json({ error: 'New username is required' });
+//   }
+//   const user = await User.findOneAndUpdate(
+//     { firebaseUid: uid },
+//     { username: newUsername },
+//     { new: true }
+//   );
 
-//   if (!uid || !email) {
-//     return res.status(400).json({ 
-//       success: false,
-//       message: "UID and email are required" 
-//     });
+//   if (!user) {
+//     return res.status(404).json({ error: 'User not found' });
 //   }
 
-//   try {
-//     let user = await User.findOne({ firebaseUid: uid });
-
-//     if (!user) {
-//       console.log("→ Creating NEW user...");
-      
-//       const defaultUsername = email.split('@')[0] || `user_${Date.now().toString().slice(-6)}`;
-
-//       user = new User({
-//         username: defaultUsername,
-//         email,
-//         firebaseUid: uid
-//       });
-
-//       const savedUser = await user.save();
-//       console.log("✅ NEW USER SAVED SUCCESSFULLY:", savedUser._id);
-//       user = savedUser;   // use the saved document
-//     } else {
-//       console.log("→ Existing user found:", user._id);
-      
-//       // Update email if changed
-//       if (user.email !== email) {
-//         user.email = email;
-//         await user.save();
-//         console.log("✅ User email updated");
-//       }
+//   res.status(200).json({
+//     message: 'Username updated successfully',
+//     user: {
+//       id: user._id,
+//       username: user.username,
+//       email: user.email,
+//       firebaseUid: user.firebaseUid
 //     }
-
-//     // ✅ Better response
-//     res.status(200).json({
-//       success: true,
-//       message: "Login successful",
-//       user: {
-//         id: user._id.toString(),           // convert ObjectId to string
-//         username: user.username,
-//         email: user.email,
-//         firebaseUid: user.firebaseUid
-//       }
-//     });
-
-//   } catch (err) {
-//     console.error("❌ LOGIN / SAVE ERROR:", err.message);
-//     console.error("Full error:", err);
-    
-//     res.status(500).json({ 
-//       success: false,
-//       message: "Database error during login", 
-//       error: err.message 
-//     });
-//   }
+//   });
 // });
 
+// const updateAvatar = asyncHandler(async (req, res) => {
+//   const { uid } = req.body;
+//   const { newAvatarUrl } = req.body;
+//   if (!newAvatarUrl) {
+//     return res.status(400).json({ error: 'New avatar URL is required' });
+//   }
+//   const user = await User.findOneAndUpdate(
+//     { firebaseUid: uid },
+//     { avatarUrl: newAvatarUrl },
+//     { new: true }
+//   );
 
+//   if (!user) {
+//     return res.status(404).json({ error: 'User not found' });
+//   }
 
-
-
-
-
-
+//   res.status(200).json({
+//     message: 'Avatar updated successfully',
+//     user: {
+//       id: user._id,
+//       username: user.username,
+//       email: user.email,
+//       firebaseUid: user.firebaseUid,
+//       avatarUrl: user.avatarUrl
+//     }
+//   });
+// });
 
 module.exports = { loginUser, registerUser };   // or module.exports = registerUser;

@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true   // allows null/undefined values
+  },
+  profilePicture: {
+    type: String,
+    default: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
   }
 }, { timestamps: true });
 

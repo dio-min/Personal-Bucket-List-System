@@ -24,6 +24,7 @@ function Login() {
         password,
       );
       const firebaseUser = userCredential.user;
+      console.log("Firebase login successful:", firebaseUser);
 
 
       const response = await axios.post(`${API_BASE_URL}/api/user/login`,

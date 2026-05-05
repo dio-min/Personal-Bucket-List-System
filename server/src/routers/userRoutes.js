@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { loginUser, registerUser } = require('./../controllers/userController');   // ← Destructuring
+const { loginUser, registerUser } = require('./../controllers/userController');   
+// const { updateUsername } = require('../controllers/userController'); 
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+// router.put('/updateUsername', updateUsername);
 
 module.exports = router;

@@ -27,6 +27,7 @@ function AddItem() {
       return;
     }
 
+
     const currentUser = auth.currentUser;
     const firebaseUid = currentUser?.uid || null;
 
@@ -34,6 +35,7 @@ function AddItem() {
       setError("You must be logged in.");
       return;
     }
+    
 
     setLoading(true);
     setError("");
