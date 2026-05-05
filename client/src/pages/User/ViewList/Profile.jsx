@@ -41,7 +41,7 @@ function Profile() {
     const getUserProfile = async () => {
       try {
         const response = await axios.post(
-          `http://localhost:5050/api/user/profile`,
+          `${API_BASE_URL}/api/user/profile`,
           {
             uid: uid,
           },
