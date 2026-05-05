@@ -1,4 +1,4 @@
-import { getAuth, onAuthStateChanged, updateProfile } from "firebase/auth";
+import { getAuth, onAuthStateChanged, updateProfile, deleteUser } from "firebase/auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../../../lib/config";
@@ -20,6 +20,8 @@ function Profile() {
   const [uploading, setUploading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
@@ -114,9 +116,25 @@ function Profile() {
     setImage(null);
     setPreview(null);
     setShowAvatarModal(false);
-    setShowUsernameModal(false); // ← also close username modal
+    setShowUsernameModal(false);
+    setShowDeleteModal(false); // ← also close username modal
     setNewUsername("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDeleteUser = async () => {
+    setDeleting(true);
+    try {
+      await axios.post(`${API_BASE_URL}/api/user/isdeleted`, { uid });
+      await deleteUser(auth.currentUser);
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      alert("Failed to delete account. Please try again.");
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   const handleUpdateUsername = async () => {
@@ -126,7 +144,7 @@ function Profile() {
       await updateProfile(auth.currentUser, {
         displayName: newUsername,
       });
-      await axios.post(`${API_BASE_URL}/api/user/username`, {
+      await axios.post(`${API_BASE_URL}/api/username`, {
         uid: uid,
         username: newUsername,
       });
@@ -138,22 +156,6 @@ function Profile() {
       setUploading(false);
     }
   };
-
-  const handleDeleteUser= async () =>{
-    try{
-     deleteUser(auth.currentUser);
-
-     const response = await axios.post(`${API_BASE_URL}/api/use/isdeleted`,{
-        uid:uid
-     })
-     console.log(response.data);
-     alert("User Deleted")
-
-    }
-    catch(error){
-      console.error("failed to delete user", error);
-    }
-  }
 
   return (
     <div className="flex justify-center items-center mt-8">
@@ -296,6 +298,55 @@ function Profile() {
           </div>
         )}
 
+        {/* Delete Account Confirmation Modal */}
+        {showDeleteModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+            onClick={() => !deleting && setShowDeleteModal(false)}
+          >
+            <div
+              className="flex flex-col items-center gap-4 p-6 rounded-xl"
+              style={{ backgroundColor: "#111", border: "1px solid #333", minWidth: "280px" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className="flex items-center justify-center rounded-full"
+                style={{ width: "48px", height: "48px", backgroundColor: "rgba(239,68,68,0.15)" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+              </div>
+              <h3 className="text-white font-semibold text-base">Delete Account</h3>
+              <p className="text-center" style={{ color: "#aaa", fontSize: "13px" }}>
+                This action is permanent and cannot be undone. All your data will be lost.
+              </p>
+              <div className="flex gap-2 w-full">
+                <button
+                  onClick={handleDeleteUser}
+                  disabled={deleting}
+                  className="flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50"
+                  style={{ backgroundColor: "#ef4444" }}
+                >
+                  {deleting ? "Deleting…" : "Delete"}
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleting}
+                  className="flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50"
+                  style={{ backgroundColor: "#333" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* User Info & Menu */}
         <div className="flex justify-between items-start w-full">
           <div>
@@ -329,8 +380,13 @@ function Profile() {
                 <Dropdown.Item onPress={() => fileInputRef.current?.click()}>
                   <Label>Change Avatar</Label>
                 </Dropdown.Item>
-                
-                <Dropdown.Item variant="danger">
+                <Dropdown.Item>
+                  <Label>Add Bio</Label>
+                </Dropdown.Item>
+                <Dropdown.Item
+                  variant="danger"
+                  onPress={() => setShowDeleteModal(true)}
+                >
                   <Label>Delete Account</Label>
                 </Dropdown.Item>
               </Dropdown.Menu>
