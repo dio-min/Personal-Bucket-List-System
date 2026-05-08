@@ -6,7 +6,8 @@
   "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/",
-  "orientation": "portrait-primary",
+  "categories": ["productivity", "lifestyle"],
+  "lang": "en-US",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
