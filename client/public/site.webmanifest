@@ -2,7 +2,7 @@
   "name": "Laya",
   "short_name": "Laya",
   "description": "Your personal bucketlist hub",
-  "theme_color": "#96bb7b",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/",
