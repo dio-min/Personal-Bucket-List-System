@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Navigate from "./User/Navigate"; // your component
-import ViewList from "./User/ViewList"; // your component
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
+import DataView from "./Dashboard/DataView";
+
 
 const auth = getAuth();
 
@@ -31,8 +33,14 @@ function Dashboard() {
     <div style={{ color: "white" }}>
       <Navigate />
 
-      <div className="container">
+      <div >
         <p>Welcome, {username} </p>
+
+        <div>
+          <DataView />
+          
+
+        </div>
         
         
           

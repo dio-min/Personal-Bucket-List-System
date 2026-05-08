@@ -27,7 +27,6 @@ function AddItem() {
       return;
     }
 
-
     const currentUser = auth.currentUser;
     const firebaseUid = currentUser?.uid || null;
 
@@ -35,7 +34,6 @@ function AddItem() {
       setError("You must be logged in.");
       return;
     }
-    
 
     setLoading(true);
     setError("");
@@ -47,7 +45,6 @@ function AddItem() {
         description,
         date,
         category,
-        createdAt: new Date(),
         status: "in-progress",
         firebaseUid,
         createdAt: serverTimestamp(),
@@ -63,14 +60,19 @@ function AddItem() {
         firestoreDocId: firestoreDoc.id,
       });
 
+      // Reset form
       setTitle("");
       setDescription("");
       setDate("");
       setCategory("");
-      setSuccess("Added successfully!");
+      setSuccess("Goal added successfully!");
+      
+      // Optional: Auto close modal after success
+      setTimeout(() => {
+        setSuccess("");
+      }, 2000);
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Failed to add item.";
+      const errorMessage = err.response?.data?.message || err.message || "Failed to add item.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -79,99 +81,101 @@ function AddItem() {
 
   return (
     <Modal>
-      {/* Trigger */}
+      {/* Trigger Button */}
       <Button variant="default">
         <CirclePlusFill className="size-6" />
       </Button>
 
       {/* Backdrop */}
-      <Modal.Backdrop className="bg-black/80 backdrop-blur-sm">
+      <Modal.Backdrop className="bg-black/70 backdrop-blur-sm">
         <Modal.Container className="flex items-center justify-center min-h-screen px-4">
-          <Modal.Dialog className="w-full max-w-lg p-6 bg-black border border-neutral-800 rounded-2xl shadow-xl text-neutral-100">
+          <Modal.Dialog className="w-full max-w-lg p-8 bg-white border border-neutral-200 rounded-3xl shadow-2xl text-neutral-900">
 
             <Modal.CloseTrigger />
 
             <Modal.Header>
-              <Modal.Heading className="text-lg font-semibold text-white">
+              <Modal.Heading className="text-2xl font-semibold text-neutral-900">
                 Add New Goal
               </Modal.Heading>
             </Modal.Header>
 
             <Modal.Body>
-              <form onSubmit={handleAdd} className="space-y-5">
+              <form onSubmit={handleAdd} className="space-y-6 mt-4">
 
                 {error && (
-                  <p className="text-red-400 text-sm">{error}</p>
+                  <p className="text-red-600 text-sm font-medium">{error}</p>
                 )}
                 {success && (
-                  <p className="text-green-400 text-sm">{success}</p>
+                  <p className="text-emerald-600 text-sm font-medium">{success}</p>
                 )}
 
                 {/* Title */}
                 <div>
-                  <label className="text-sm text-white-500">
+                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">
                     Goal Title
                   </label>
                   <input
                     type="text"
-                    placeholder="Goal Title"
+                    placeholder="e.g. Climb Mount Fuji"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-blue-600"
+                    className="w-full p-3.5 bg-white border border-neutral-300 rounded-2xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="text-sm text-white-500">
+                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">
                     Description
                   </label>
                   <textarea
-                    placeholder="Description"
+                    placeholder="Why is this goal important to you?"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 placeholder-neutral-600 h-20 focus:outline-none focus:border-blue-600"
+                    className="w-full p-3.5 bg-white border border-neutral-300 rounded-2xl text-neutral-900 placeholder-neutral-400 h-24 resize-y focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 {/* Date */}
                 <div>
-                  <label className="text-sm text-white-500">Date</label>
+                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">
+                    Target Date
+                  </label>
                   <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 focus:outline-none focus:border-blue-600"
+                    className="w-full p-3.5 bg-white border border-neutral-300 rounded-2xl text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="text-sm text-white-500">
+                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full mt-1 p-3 bg-neutral-900 border border-neutral-800 rounded-md text-neutral-100 focus:outline-none focus:border-blue-600"
+                    className="w-full p-3.5 bg-white border border-neutral-300 rounded-2xl text-neutral-900 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   >
-                    <option value="" className="text-white-600">
-                      Select a category
-                    </option>
+                    <option value="">Select a category</option>
                     <option value="Travel">Travel</option>
                     <option value="Health">Health</option>
                     <option value="Career">Career</option>
                     <option value="Personal">Personal</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Learning">Learning</option>
                   </select>
                 </div>
 
-                {/* Submit */}
+                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-blue-800 hover:bg-blue-900 disabled:bg-neutral-900 rounded-md font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
                 >
-                  {loading ? "Adding..." : "Add to Bucketlist"}
+                  {loading ? "Adding Goal..." : "Add to Bucketlist"}
                 </button>
 
               </form>

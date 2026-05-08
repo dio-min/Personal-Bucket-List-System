@@ -6,11 +6,10 @@ import axios from "axios";
 import BorderGlow from "../component/BorderGlow";
 import API_BASE_URL from "../lib/config";
 
-// Simple check: if the input contains "@" treat it as an email, otherwise a username
 const isEmail = (value) => value.includes("@");
 
 function Login() {
-  const [identifier, setIdentifier] = useState(""); // email or username
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -22,26 +21,16 @@ function Login() {
     try {
       let emailToUse = identifier.trim();
 
-      // If the user typed a username, resolve it to an email via the backend
       if (!isEmail(emailToUse)) {
         const { data } = await axios.post(
           `${API_BASE_URL}/api/user/get-email-by-username`,
           { username: emailToUse },
         );
-
-        if (!data?.email) {
-          throw new Error("No account found with that username.");
-        }
-
+        if (!data?.email) throw new Error("No account found with that username.");
         emailToUse = data.email;
       }
 
-      // Sign in with Firebase using the resolved email
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        emailToUse,
-        password,
-      );
+      const userCredential = await signInWithEmailAndPassword(auth, emailToUse, password);
       const firebaseUser = userCredential.user;
 
       await axios.post(`${API_BASE_URL}/api/user/login`, {
@@ -59,12 +48,12 @@ function Login() {
   };
 
   return (
-    <>
-      <div className="container">
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-80">
         <BorderGlow
           edgeSensitivity={40}
           glowColor="240 80 80"
-          backgroundColor="#000000"
+          backgroundColor="#ffffff"
           borderRadius={28}
           glowRadius={40}
           glowIntensity={1}
@@ -73,37 +62,50 @@ function Login() {
           colors={["#ffffff", "#ffffff", "#6795ff"]}
           className="pointer-events-auto"
         >
-          <div className="inner-form">
-            <form onSubmit={handleLogin} className="style-form">
-              <h1>Login</h1>
+          <form onSubmit={handleLogin} className="flex flex-col gap-3 px-6 py-6">
+            <h1 className="text-gray-800 text-lg font-semibold text-center">Login</h1>
 
-              <input
-                type="text"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Email or Username"
-                required
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-              />
-              <Link to={"/forgotpassword"}>Forgot password</Link>
-              <button type="submit" disabled={loading}>
-                {loading ? "Logging in..." : "Login"}
+            <input
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Email or Username"
+              required
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition text-sm"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition text-sm"
+            />
+
+            <Link to="/forgotpassword" className="text-xs text-blue-400 hover:text-blue-600 transition self-end">
+              Forgot password
+            </Link>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium transition"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+            <Link to="/register" className="w-full">
+              <button
+                type="button"
+                className="w-full py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 active:bg-gray-100 text-sm transition"
+              >
+                Register
               </button>
-
-              <Link to="/register">
-                <button>Register</button>
-              </Link>
-            </form>
-          </div>
+            </Link>
+          </form>
         </BorderGlow>
       </div>
-    </>
+    </div>
   );
 }
 

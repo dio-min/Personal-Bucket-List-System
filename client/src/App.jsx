@@ -18,18 +18,15 @@ import "./component/Particles/Particles.css";
 function App() {
   return (
     
-    <div className="fixed inset-0 w-full h-screen overflow-hidden bg-black">
-      <Particles
-          particleColors={["#ffffff"]}
-          particleCount={300}
-          particleSpread={10}
-          speed={0.1}
-          particleBaseSize={100}
-          moveParticlesOnHover
-          alphaParticles={false}
-          disableRotation={false}
-          pixelRatio={1}
-      />
+    <div className="relative min-h-screen w-full overflow-auto "  
+    style={{
+  backgroundImage:
+    "url('https://i.pinimg.com/1200x/4a/6b/13/4a6b1378c92f3823732908508f1fd9b1.jpg')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+}}>
+     
       <div className="absolute inset-0 z-10">
         
         <Router>

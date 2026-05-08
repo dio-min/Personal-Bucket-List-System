@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { Button, Modal, Label, TextArea } from "@heroui/react";
 import Rating from "@mui/material/Rating";
 import StarIcon from "@mui/icons-material/Star";
@@ -15,7 +15,6 @@ import {
 } from "firebase/firestore";
 
 import axios from "axios";
-import { documentId } from "firebase/firestore";
 import API_BASE_URL from "../../lib/config";
 
 const labels = {
@@ -30,6 +29,7 @@ const labels = {
   4.5: "Excellent",
   5: "Excellent+",
 };
+
 function capitalizeFirstLetter(str) {
   if (typeof str !== "string" || str.length === 0) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -41,51 +41,35 @@ export const Completed = ({ id, firebaseDocId }) => {
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedGoal, setSelectedGoal] = useState(null);
-  const [preview, setPreview] = useState(null); // Image preview URL
-  const firebaseUid = auth.currentUser?.uid || null;
-
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [uid, setUid] = useState(null);
   const [goals, setGoals] = useState([]);
+  const [error, setError] = useState(""); // Added missing error state
+
+  const firebaseUid = auth.currentUser?.uid || null;
 
   // Get current user
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUid(user?.uid ?? null);
     });
-
-    return () => unsubscribeAuth();
+    return () => unsubscribe();
   }, []);
 
   // Fetch user's goals
   useEffect(() => {
-    if (!uid) {
-      setLoading(false);
-      return;
-    }
+    if (!uid) return;
 
     const q = query(
       collection(db, "bucketlist"),
       where("firebaseUid", "==", uid),
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const goalsList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setGoals(goalsList);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Snapshot error:", err);
-        setError("Failed to load goals: " + err.message);
-        setLoading(false);
-      },
-    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setGoals(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
 
     return () => unsubscribe();
   }, [uid]);
@@ -97,91 +81,67 @@ export const Completed = ({ id, firebaseDocId }) => {
       setPreview(URL.createObjectURL(file));
     }
   };
-  const handleComplete = async (e) => {
+
+  const handleComplete = async () => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/goal/getItemByID`,
-        {
-          dbid: id,
-        },
+        { dbid: id },
       );
-      const data = response.data;
-      console.log("Data received from backend:", data);
-      const goal = data?.items?.[0];
+      const goal = response.data?.items?.[0];
 
       if (!goal) {
         alert("No details found for this goal.");
         return;
       }
 
-      // Clean data for UI display
-      const goalDetails = {
-        title: goal.title || "Untitled Goal",
-
-        status: goal.status || "Pending",
-      };
-      setSelectedGoal(goalDetails);
-      setDate(new Date().toISOString().split("T")[0]); // Default to today
-      setNotes(""); // Clear notes
-      setImage(null); // Clear image
-      setPreview(null); // Clear preview
-      setRating(0); // Reset rating
-    } catch (error) {
-      console.error("get data error:", error);
-      setError(error.response?.data?.message || "Failed to get goal");
+      setSelectedGoal({ title: goal.title || "Untitled Goal" });
+      setDate(new Date().toISOString().split("T")[0]);
+      setNotes("");
+      setImage(null);
+      setPreview(null);
+      setRating(0);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load goal details.");
     }
   };
 
   const handlemarkAsDone = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
-    if (rating === 0 || !date || notes.trim() === "" || !image) {
-      alert("Please fill in all fields and provide a rating.");
-      setLoading(false); // ✅ important
+    if (rating === 0 || !date || !notes.trim() || !image) {
+      alert("Please fill all fields, add a rating and upload a photo.");
       return;
     }
 
+    setLoading(true);
+
     try {
-      const goalstatus = doc(db, "bucketlist", firebaseDocId);
-      await updateDoc(goalstatus, { status: "completed" });
-      alert("Goal marked as completed in Firestore!");
-      const res = await axios.put(`${API_BASE_URL}/api/goal/updateStatus`, {
-        dbid: id,
+      // Update Firestore status
+      await updateDoc(doc(db, "bucketlist", firebaseDocId), {
         status: "completed",
       });
-      console.log("Status update response:", res.data);
-      alert("Goal marked as completed!");
 
       const formData = new FormData();
-
       formData.append("title", selectedGoal.title);
       formData.append("description", notes);
       formData.append("date", date);
       formData.append("itemID", id);
       formData.append("rating", rating);
-      formData.append("image", image); // MUST match upload.single("image")
+      formData.append("image", image);
       formData.append("firebaseUid", firebaseUid);
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/complete/addComplete`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
+      await axios.post(`${API_BASE_URL}/api/complete/addComplete`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      console.log("Complete submission response:", response.data);
-      alert("Goal marked as completed and journal entry saved!");
-      setLoading(false);
+      alert("Goal completed successfully!");
       setIsOpen(false);
-      window.location.reload(); // Refresh to show changes
+      window.location.reload();
     } catch (error) {
-      console.error("Error preparing form data:", error);
-      alert("Failed to prepare data for submission");
-      return;
+      console.error(error);
+      alert("Failed to save completion.");
     } finally {
       setLoading(false);
     }
@@ -189,58 +149,57 @@ export const Completed = ({ id, firebaseDocId }) => {
 
   return (
     <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
-      {/* Trigger */}
+      {/* Trigger Button */}
       <Button
-        className="bg-black text-white border border-neutral-700 hover:bg-neutral-900"
+        className="bg-white text-neutral-900 border border-neutral-300 hover:bg-neutral-100 font-medium"
         onClick={() => {
           setIsOpen(true);
           handleComplete();
         }}
       >
-        Mark as done
+        Mark as Done
       </Button>
 
-      {/* Backdrop */}
-      <Modal.Backdrop className="bg-black/80 backdrop-blur-sm">
-        <Modal.Container>
+      {/* Backdrop & Dialog */}
+      <Modal.Backdrop className="bg-black/60 backdrop-blur-md">
+        <Modal.Container className="flex items-center justify-center min-h-screen px-4">
           <Modal.Dialog
-            className={`p-6 bg-black border border-neutral-800 rounded-2xl shadow-xl text-neutral-100 transition-all
-        ${preview ? "w-full max-w-4xl" : "w-full max-w-lg"}`}
+            className={`p-8 bg-white border border-neutral-200 rounded-3xl shadow-2xl text-neutral-900 transition-all
+              ${preview ? "w-full max-w-4xl" : "w-full max-w-lg"}`}
           >
             <Modal.CloseTrigger />
 
             <Modal.Header>
-              <Modal.Heading className="text-white text-lg">
-                Journal
+              <Modal.Heading className="text-2xl font-semibold text-neutral-900">
+                Complete Goal
               </Modal.Heading>
             </Modal.Header>
 
-            {/* RESPONSIVE LAYOUT */}
             <Modal.Body>
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* LEFT SIDE (FORM) */}
+              <div className="flex flex-col lg:flex-row gap-8 mt-4">
+                {/* Left Side - Form */}
                 <div className="flex-1">
-                  <form onSubmit={handlemarkAsDone} className="space-y-5">
+                  <form onSubmit={handlemarkAsDone} className="space-y-6">
                     {selectedGoal && (
-                      <h1 className="text-lg font-semibold text-white text-center">
+                      <h1 className="text-xl font-semibold text-center text-neutral-800">
                         {capitalizeFirstLetter(selectedGoal.title)}
                       </h1>
                     )}
 
-                    <hr className="border-neutral-800" />
-
-                    {/* Rating + Date */}
-                    <div className="flex flex-col md:flex-row gap-4 md:justify-between">
+                    {/* Rating & Date */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <Label className="text-white">Rating</Label>
-                        <div className="flex items-center gap-3 bg-neutral-900 border border-neutral-800 p-3 rounded-md">
+                        <Label className="text-neutral-700 font-medium">
+                          Your Rating
+                        </Label>
+                        <div className="mt-2 bg-neutral-50 border border-neutral-200 p-4 rounded-2xl flex items-center gap-4">
                           <Rating
                             value={rating}
                             onChange={(e, newValue) => setRating(newValue)}
                             precision={0.5}
+                            size="small"
                             sx={{
-                              "& .MuiRating-iconFilled": { color: "#ffb300" },
-                              "& .MuiRating-iconEmpty": { color: "#404040" },
+                              "& .MuiRating-iconFilled": { color: "#facc15" },
                             }}
                             emptyIcon={
                               <StarIcon
@@ -249,46 +208,54 @@ export const Completed = ({ id, firebaseDocId }) => {
                               />
                             }
                           />
-                          <span className="text-sm text-neutral-400">
+                          <span className="text-s font-medium text-neutral-700">
                             {labels[rating] || ""}
                           </span>
                         </div>
                       </div>
 
                       <div>
-                        <Label className="text-white">Completion Date</Label>
-                        <div className="bg-neutral-900 border border-neutral-800 p-3 rounded-md">
+                        <Label className="text-neutral-700 font-medium">
+                          Completed On
+                        </Label>
+                        <div className="mt-2 bg-neutral-50 border border-neutral-200 p-4 rounded-2xl">
                           <input
                             type="date"
-                            className="bg-transparent text-white outline-none"
-                            onChange={(e) => setDate(e.target.value)}
                             value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="bg-transparent w-full outline-none text-neutral-800"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Notes */}
-                    <div className="flex flex-col gap-1">
-                      <Label className="text-white">Detailed notes</Label>
+                    <div className="space-y-2">
+                      <Label className="text-neutral-700 font-medium text-sm tracking-wide">
+                        My Experience
+                      </Label>
+
                       <TextArea
-                        placeholder="Write your notes..."
+                        placeholder="How was the experience? What did you learn?"
                         rows={5}
-                        className="bg-neutral-900 border border-neutral-800 text-white rounded-md p-2 placeholder-neutral-600"
-                        onChange={(e) => setNotes(e.target.value)}
+                        className="w-full bg-white border border-neutral-200 rounded-3xl p-5 
+               text-neutral-800 placeholder:text-neutral-400 
+               focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
+               min-h-[160px] resize-y"
                         value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
                       />
                     </div>
 
-                    {/* Upload */}
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-white">Upload image</Label>
-
-                      <label className="border-2 border-dashed border-neutral-800 rounded-md p-4 text-center cursor-pointer hover:bg-neutral-900 transition">
-                        <span className="text-sm text-neutral-500">
-                          {image ? image.name : "Click to upload"}
+                    {/* Image Upload */}
+                    <div>
+                      <Label className="text-neutral-700 font-medium">
+                        Upload Photo
+                      </Label>
+                      <label className="mt-2 border-2 border-dashed border-neutral-300 hover:border-neutral-400 rounded-2xl p-8 text-center cursor-pointer block transition">
+                        <span className="text-neutral-500">
+                          {image ? image.name : "Click to upload an image"}
                         </span>
-
                         <input
                           type="file"
                           accept="image/*"
@@ -298,26 +265,23 @@ export const Completed = ({ id, firebaseDocId }) => {
                       </label>
                     </div>
 
-                    {/* Submit */}
-
                     <Button
                       type="submit"
-                      className="w-full bg-neutral-800 hover:bg-neutral-700 text-white"
-                      onClick={handlemarkAsDone}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-2xl"
                       disabled={loading}
                     >
-                      {loading ? "Saving..." : "Save"}
+                      {loading ? "Saving..." : "Save Completion"}
                     </Button>
                   </form>
                 </div>
 
-                {/* RIGHT SIDE (IMAGE PREVIEW) */}
+                {/* Right Side - Image Preview */}
                 {preview && (
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className="flex-1 flex items-center justify-center bg-neutral-50 border border-neutral-200 rounded-3xl p-4">
                     <img
                       src={preview}
                       alt="Preview"
-                      className="w-full max-h-[500px] object-contain rounded-md border border-neutral-800"
+                      className="max-h-[480px] w-full object-contain rounded-2xl"
                     />
                   </div>
                 )}
