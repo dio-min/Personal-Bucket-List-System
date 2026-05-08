@@ -23,7 +23,7 @@ function Navigate() {
               className="w-10 h-10 rounded-full object-cover" 
             />
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">HeyBuck</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Laya</h1>
               
             </div>
           </div>

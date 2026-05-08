@@ -6,8 +6,9 @@ import Profile from './ViewList/Profile'
 function Album() {
   return (
     <>
-      <Navigate />
+      
       <div>
+        <Navigate />
         <Profile />
         
     
