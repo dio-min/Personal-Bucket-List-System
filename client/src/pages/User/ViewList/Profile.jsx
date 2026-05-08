@@ -169,7 +169,7 @@ function Profile() {
 
       {/* Main Profile Card - Light Mode */}
       <div
-        className="flex p-6 rounded-2xl w-[380px] shadow-sm border relative"
+        className="flex p-6 rounded-2xl w-[580px] h-[150px] shadow-sm border relative"
         style={{
           backgroundColor: "white",
           borderColor: "#e5e5e5",
@@ -197,8 +197,8 @@ function Profile() {
                 src={userAvatar || "/default-avatar.png"} // Add fallback if needed
                 alt="User Avatar"
                 style={{
-                  width: "80px",
-                  height: "80px",
+                  width: "100px",
+                  height: "100px",
                   borderRadius: "50%",
                   objectFit: "cover",
                   border: "3px solid #e5e5e5",
@@ -290,12 +290,12 @@ function Profile() {
             />
             <div className="flex gap-3 w-full mt-2">
               <button
-                onClick={handleUpload}
-                disabled={uploading}
-                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium transition-colors"
-              >
-                {uploading ? "Saving…" : "Save Changes"}
-              </button>
+  onClick={handleUpload}
+  disabled={uploading}
+  className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
+>
+  {uploading ? "Saving…" : "Save Changes"}
+</button>
               <button
                 onClick={handleCancelUpload}
                 className="flex-1 py-3 rounded-xl font-medium text-gray-700 hover:bg-gray-100 transition-colors border border-gray-300"
@@ -328,12 +328,12 @@ function Profile() {
             />
             <div className="flex gap-3 w-full mt-2">
               <button
-                onClick={handleUpdateUsername}
-                disabled={uploading}
-                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium transition-colors"
-              >
-                {uploading ? "Saving…" : "Save Changes"}
-              </button>
+  onClick={handleUpdateUsername}
+  disabled={uploading}
+  className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
+>
+  {uploading ? "Saving…" : "Save Changes"}
+</button>
               <button
                 onClick={handleCancelUpload}
                 className="flex-1 py-3 rounded-xl font-medium text-gray-700 hover:bg-gray-100 transition-colors border border-gray-300"

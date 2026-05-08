@@ -240,6 +240,12 @@ function ViewList() {
                       <Dropdown.Item id="health">
                         <Label>Health</Label>
                       </Dropdown.Item>
+                      <Dropdown.Item id="adventure">
+                        <Label>Adventure</Label>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="learning">
+                        <Label>Learning</Label>
+                      </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown.Popover>
                 </Dropdown>

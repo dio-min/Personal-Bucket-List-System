@@ -171,12 +171,12 @@ function AddItem() {
 
                 {/* Submit Button */}
                 <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
-                >
-                  {loading ? "Adding Goal..." : "Add to Bucketlist"}
-                </button>
+  type="submit"
+  disabled={loading}
+  className="w-full py-3.5 bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
+>
+  {loading ? "Adding Goal..." : "Add to Bucketlist"}
+</button>
 
               </form>
             </Modal.Body>

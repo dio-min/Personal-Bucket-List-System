@@ -57,12 +57,11 @@ function ForgetPassword() {
             />
 
             <button
-              type="submit"
-              className="w-full py-2 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium transition"
-            >
-              Send Link
-            </button>
-
+  type="submit"
+  className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white text-sm font-medium transition"
+>
+  Send Link
+</button>
             <Link
               to="/login"
               className="text-xs text-blue-400 hover:text-blue-600 transition text-center"

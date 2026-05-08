@@ -191,11 +191,11 @@ export const Update = ({ id, firebaseDocId }) => {
 
                 {/* Submit Button */}
                 <Button
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 rounded-2xl mt-6"
-                >
-                  Update Goal
-                </Button>
+  type="submit"
+  className="w-full bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white font-semibold py-3.5 rounded-2xl mt-6 transition-colors"
+>
+  Update Goal
+</Button>
 
               </form>
             </Modal.Body>

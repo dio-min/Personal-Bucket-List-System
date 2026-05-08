@@ -60,7 +60,7 @@ function DisplayComplete() {
         <ImageList
           variant="masonry"
           cols={3}
-          gap={20}
+          gap={10}
           sx={{
             width: "100%",
             maxWidth: 1100,           // ← Reduced from 1300
@@ -73,10 +73,10 @@ function DisplayComplete() {
               onClick={() => setSelectedItem(item)}
               sx={{
                 cursor: "pointer",
-                borderRadius: "28px",
+                borderRadius: "20px",
                 overflow: "hidden",
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.48)",
                 transition: "all 0.3s ease",
 
                 "&:hover img": { transform: "scale(1.05)" },
@@ -91,7 +91,7 @@ function DisplayComplete() {
                   width: "100%",
                   height: "auto",
                   objectFit: "cover",
-                  borderRadius: "28px",
+                  borderRadius: "20px",
                 }}
               />
 

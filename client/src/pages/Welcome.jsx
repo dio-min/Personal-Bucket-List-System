@@ -38,9 +38,9 @@ function Welcome() {
             />
 
             <Link to="/login" className="w-full">
-              <button className="w-full py-2 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium transition">
-                Login
-              </button>
+              <button className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white text-sm font-medium transition">
+  Login
+</button>
             </Link>
 
             <Link to="/register" className="w-full">

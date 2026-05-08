@@ -12,7 +12,7 @@ function Navigate() {
       className="sticky top-0 z-50 border-b border-slate-200 backdrop-blur-md"
       style={{ backgroundColor: "#96bb7b" }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-5xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           
           {/* Left Side */}

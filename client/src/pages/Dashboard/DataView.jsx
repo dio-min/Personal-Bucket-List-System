@@ -13,6 +13,8 @@ import {
 } from "chart.js";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { Doughnut, Bar } from "react-chartjs-2";
+import API_BASE_URL from "../../lib/config";
+import axios from "axios";
 
 ChartJS.register(
   ArcElement,
@@ -24,10 +26,12 @@ ChartJS.register(
 );
 
 function DataView() {
+  const [rating, setRating] = useState(0);
   const [pendingGoals, setPendingGoals] = useState([]);
   const [completedGoals, setCompletedGoals] = useState([]);
   const [uid, setUid] = useState(null);
 
+  // AUTH
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUid(user?.uid ?? null);
@@ -36,6 +40,7 @@ function DataView() {
     return () => unsubscribeAuth();
   }, []);
 
+  // FIRESTORE LISTENERS
   useEffect(() => {
     if (!uid) {
       setPendingGoals([]);
@@ -79,20 +84,51 @@ function DataView() {
     };
   }, [uid]);
 
+  // RATING API
+  useEffect(() => {
+    if (!uid) return;
+
+    const fetchData = async () => {
+      try {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/complete/getCompleteByUser`,
+          { firebaseUid: uid }
+        );
+
+        const data = res.data;
+
+        const ratings = data
+          .map((item) => Number(item.rating))
+          .filter((r) => !isNaN(r));
+
+        const average =
+          ratings.length > 0
+            ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+            : 0;
+
+        setRating(Number(average.toFixed(1)));
+      } catch (error) {
+        console.error("Error fetching ratings:", error);
+      }
+    };
+
+    fetchData();
+  }, [uid]);
+
   const total = pendingGoals.length + completedGoals.length;
 
   const stats = {
     totalGoals: total,
     completedGoals: completedGoals.length,
     pendingGoals: pendingGoals.length,
-    averageRating: 0,
+    averageRating: rating,
     completionRate:
       total > 0
         ? Math.round((completedGoals.length / total) * 100)
         : 0,
   };
 
-  // DOUGHNUT DATA
+  // DOUGHNUT
   const doughnutData = {
     labels: ["Completed", "Pending"],
     datasets: [
@@ -104,31 +140,22 @@ function DataView() {
     ],
   };
 
-  // CATEGORY COUNTS
+  // CATEGORY COUNT
   const completedCategoryCounts = {};
   const pendingCategoryCounts = {};
 
   completedGoals.forEach((goal) => {
     const category = goal.category || "Uncategorized";
-
-    if (!completedCategoryCounts[category]) {
-      completedCategoryCounts[category] = 0;
-    }
-
-    completedCategoryCounts[category] += 1;
+    completedCategoryCounts[category] =
+      (completedCategoryCounts[category] || 0) + 1;
   });
 
   pendingGoals.forEach((goal) => {
     const category = goal.category || "Uncategorized";
-
-    if (!pendingCategoryCounts[category]) {
-      pendingCategoryCounts[category] = 0;
-    }
-
-    pendingCategoryCounts[category] += 1;
+    pendingCategoryCounts[category] =
+      (pendingCategoryCounts[category] || 0) + 1;
   });
 
-  // MERGE ALL CATEGORIES
   const allCategories = [
     ...new Set([
       ...Object.keys(completedCategoryCounts),
@@ -136,7 +163,6 @@ function DataView() {
     ]),
   ];
 
-  // SORT BY TOTAL
   const sortedCategories = allCategories.sort((a, b) => {
     const totalA =
       (completedCategoryCounts[a] || 0) +
@@ -149,14 +175,13 @@ function DataView() {
     return totalB - totalA;
   });
 
-  // BAR DATA
   const categoryData = {
     labels: sortedCategories,
     datasets: [
       {
         label: "Completed",
         data: sortedCategories.map(
-          (category) => completedCategoryCounts[category] || 0
+          (c) => completedCategoryCounts[c] || 0
         ),
         backgroundColor: "#86efac",
         borderRadius: 6,
@@ -165,7 +190,7 @@ function DataView() {
       {
         label: "Pending",
         data: sortedCategories.map(
-          (category) => pendingCategoryCounts[category] || 0
+          (c) => pendingCategoryCounts[c] || 0
         ),
         backgroundColor: "#fde68a",
         borderRadius: 6,
@@ -178,42 +203,24 @@ function DataView() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
     },
     scales: {
       x: {
-        stacked: false,
-        ticks: {
-          color: "#6b7280",
-          font: {
-            size: 11,
-          },
-        },
-        grid: {
-          display: false,
-        },
+        ticks: { color: "#6b7280", font: { size: 11 } },
+        grid: { display: false },
       },
       y: {
         beginAtZero: true,
-        stacked: false,
-        ticks: {
-          color: "#6b7280",
-          font: {
-            size: 11,
-          },
-        },
-        grid: {
-          color: "#f3f4f6",
-        },
+        ticks: { color: "#6b7280", font: { size: 11 } },
+        grid: { color: "#f3f4f6" },
       },
     },
   };
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 text-gray-800">
-      <h1 className="text-xl font-semibold text-gray-800 mb-5">
+      <h1 className="text-xl font-semibold mb-5">
         Dashboard Analytics
       </h1>
 
@@ -231,65 +238,24 @@ function DataView() {
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-        {/* DOUGHNUT */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 min-h-[280px]">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+        <div className="bg-white border rounded-xl p-4 h-64">
+          <h2 className="text-sm font-semibold mb-3">
             Goal Status
           </h2>
-
-          <div className="flex gap-3 mb-3">
-            <ChartLegend
-              color="#86efac"
-              label="Completed"
-              value={stats.completedGoals}
-            />
-
-            <ChartLegend
-              color="#fde68a"
-              label="Pending"
-              value={stats.pendingGoals}
-            />
-          </div>
-
-          <div className="w-full h-56">
-            <Doughnut
-              data={doughnutData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-              }}
-            />
-          </div>
+          <Doughnut data={doughnutData} options={chartOptions} />
         </div>
 
-        {/* BAR */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 min-h-[280px]">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+        <div className="bg-white border rounded-xl p-4 h-64">
+          <h2 className="text-sm font-semibold mb-3">
             Goals by Category
           </h2>
-
-          <div className="flex gap-3 mb-3">
-            <ChartLegend color="#86efac" label="Completed" />
-            <ChartLegend color="#fde68a" label="Pending" />
-          </div>
-
-          <div className="w-full h-56">
-            <Bar data={categoryData} options={chartOptions} />
-          </div>
+          <Bar data={categoryData} options={chartOptions} />
         </div>
       </div>
 
-      {/* BUCKETLIST */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <h2 className="text-base font-semibold text-gray-700 mb-4">
-          Your Bucketlist
-        </h2>
-
+      {/* LIST */}
+      <div className="bg-white border rounded-xl p-4">
+        <h2 className="font-semibold mb-3">Your Bucketlist</h2>
         <ViewList />
       </div>
     </div>
@@ -298,28 +264,10 @@ function DataView() {
 
 function StatCard({ title, value }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3">
-      <p className="text-xs text-gray-400 mb-1">{title}</p>
-      <p className="text-xl font-bold text-gray-800">{value}</p>
+    <div className="bg-white border rounded-xl p-3">
+      <p className="text-xs text-gray-400">{title}</p>
+      <p className="text-xl font-bold">{value}</p>
     </div>
-  );
-}
-
-function ChartLegend({ color, label, value }) {
-  return (
-    <span className="flex items-center gap-1.5 text-xs text-gray-500">
-      <span
-        style={{
-          background: color,
-          width: 8,
-          height: 8,
-          borderRadius: 2,
-          display: "inline-block",
-        }}
-      />
-      {label}
-      {value !== undefined ? ` — ${value}` : ""}
-    </span>
   );
 }
 

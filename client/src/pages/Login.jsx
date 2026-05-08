@@ -87,12 +87,12 @@ function Login() {
             </Link>
 
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium transition"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
+  type="submit"
+  disabled={loading}
+  className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:opacity-50 text-white text-sm font-medium transition"
+>
+  {loading ? "Logging in..." : "Login"}
+</button>
 
             <Link to="/register" className="w-full">
               <button

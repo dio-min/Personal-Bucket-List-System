@@ -151,14 +151,14 @@ export const Completed = ({ id, firebaseDocId }) => {
     <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
       {/* Trigger Button */}
       <Button
-        className="bg-white text-neutral-900 border border-neutral-300 hover:bg-neutral-100 font-medium"
-        onClick={() => {
-          setIsOpen(true);
-          handleComplete();
-        }}
-      >
-        Mark as Done
-      </Button>
+  className="bg-[#0f172b] text-white border border-neutral-300 hover:bg-[#111a33] active:bg-[#0b1224] font-medium transition-colors"
+  onClick={() => {
+    setIsOpen(true);
+    handleComplete();
+  }}
+>
+  Mark as Done
+</Button>
 
       {/* Backdrop & Dialog */}
       <Modal.Backdrop className="bg-black/60 backdrop-blur-md">
@@ -238,10 +238,10 @@ export const Completed = ({ id, firebaseDocId }) => {
                       <TextArea
                         placeholder="How was the experience? What did you learn?"
                         rows={5}
-                        className="w-full bg-white border border-neutral-200 rounded-3xl p-5 
+                        className="w-full bg-white border border-neutral-200 rounded-3xl  
                text-neutral-800 placeholder:text-neutral-400 
                focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
-               min-h-[160px] resize-y"
+               min-h-[140px] resize-y"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                       />
@@ -266,12 +266,12 @@ export const Completed = ({ id, firebaseDocId }) => {
                     </div>
 
                     <Button
-                      type="submit"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-2xl"
-                      disabled={loading}
-                    >
-                      {loading ? "Saving..." : "Save Completion"}
-                    </Button>
+  type="submit"
+  className="w-full bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white font-semibold py-3 rounded-2xl transition-colors"
+  disabled={loading}
+>
+  {loading ? "Saving..." : "Save Completion"}
+</Button>
                   </form>
                 </div>
 

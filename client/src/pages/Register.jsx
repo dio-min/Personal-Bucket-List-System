@@ -11,9 +11,11 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
+    setLoading(true);
     e.preventDefault();
 
     if (password.length < 8) {
@@ -43,9 +45,11 @@ function Register() {
       setUsername("");
       setPassword("");
       setConfirmPassword("");
+      setLoading(false)
 
       console.log("Backend response:", response.data);
       alert("User registered successfully!");
+      
       navigate("/login");
     } catch (err) {
       console.error("Registration error:", err);
@@ -107,11 +111,12 @@ function Register() {
             />
 
             <button
-              type="submit"
-              className="w-full py-2 rounded-lg bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium transition"
-            >
-              Register
-            </button>
+  type="submit"
+  disabled={loading}
+  className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors duration-200"
+>
+  {loading ? "Registering..." : "Register"}
+</button>
 
             <Link to="/login" className="w-full">
               <button
