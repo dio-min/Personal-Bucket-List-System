@@ -260,80 +260,55 @@ function DataView() {
 
       {/* CHARTS */}
       {/* CHARTS */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+{/* CHARTS */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
 
-  {/* DOUGHNUT CARD */}
-  <div className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-    <h2 className="text-sm font-semibold text-neutral-700 mb-4">
-      Goal Status
-    </h2>
+  {/* DOUGHNUT */}
+  <div className="bg-white border rounded-xl p-4 h-64">
+  <h2 className="text-sm font-semibold mb-3">
+    Goal Status
+  </h2>
 
-    <div className="flex items-center justify-center h-60">
-      <Doughnut
-        data={doughnutData}
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: "bottom",
-              labels: {
-                boxWidth: 12,
-                usePointStyle: true,
-                padding: 16,
-              },
-            },
-          },
-        }}
-      />
+  {/* LEGEND + VALUES */}
+  <div className="flex justify-center gap-4 mb-3 text-xs text-gray-600">
+    <div className="flex items-center gap-1">
+      <span className="w-2 h-2 rounded-sm bg-[#86efac]" />
+      Completed: {stats.completedGoals}
+    </div>
+
+    <div className="flex items-center gap-1">
+      <span className="w-2 h-2 rounded-sm bg-[#fde68a]" />
+      Pending: {stats.pendingGoals}
     </div>
   </div>
 
-  {/* CATEGORY CARD */}
-  <div className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-    <h2 className="text-sm font-semibold text-neutral-700 mb-4">
+  <div className="h-44">
+    <Doughnut
+      data={doughnutData}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false, // ✅ enable legend
+            position: "bottom",
+            
+          },
+        },
+      }}
+      style={{margin:"auto", paddingBottom:"10px"}}
+    />
+  </div>
+</div>
+
+  {/* BAR */}
+  <div className="bg-white border rounded-xl p-4 h-64">
+    <h2 className="text-sm font-semibold mb-3">
       Goals by Category
     </h2>
 
-    <div className="h-60">
-      <Bar
-        data={categoryData}
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: "bottom",
-              labels: {
-                boxWidth: 12,
-                usePointStyle: true,
-                padding: 16,
-              },
-            },
-          },
-          scales: {
-            x: {
-              stacked: true,
-              grid: { display: false },
-              ticks: {
-                color: "#6b7280",
-                font: { size: 11 },
-              },
-            },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              grid: { color: "#f3f4f6" },
-              ticks: {
-                color: "#6b7280",
-                font: { size: 11 },
-              },
-            },
-          },
-        }}
-      />
+    <div className="h-48">
+      <Bar data={categoryData} options={chartOptions} />
     </div>
   </div>
 
