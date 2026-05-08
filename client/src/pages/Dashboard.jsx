@@ -10,9 +10,7 @@ import DataView from "./Dashboard/DataView";
 const auth = getAuth();
 
 function Dashboard() {
-  const [username, setUsername] = useState("");
-
-  const navigate = useNavigate();
+ 
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -34,7 +32,7 @@ function Dashboard() {
       <Navigate />
 
       <div >
-        <p>Welcome, {username} </p>
+        
 
         <div>
           <DataView />
