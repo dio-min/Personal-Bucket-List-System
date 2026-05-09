@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import Logout from "../Logout";
+import Logout from "./Logout";
 import { Button } from "@heroui/react";
 import { Home, Images, Menu, X } from "lucide-react";
+import logo from "../assets/logos1.png";
 
 function Navigate() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,7 @@ function Navigate() {
             {/* LEFT */}
             <div className="flex items-center gap-3">
               <img
-                src="/logos1.png"
+                src={logo}
                 alt="Logo"
                 className="w-11 h-11 rounded-full object-cover border border-white/30 shadow-sm"
               />

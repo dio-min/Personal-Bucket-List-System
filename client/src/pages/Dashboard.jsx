@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../lib/firebase";
-import Navigate from "./User/Navigate"; // your component
+import Navigate from "./Navigate"; // your component
 
 import { useNavigate } from "react-router-dom";
 import DataView from "./Dashboard/DataView";
