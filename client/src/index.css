@@ -17,13 +17,11 @@ body {
   100% { background-position: -200% 0; } */
 }
 
-.slide-up {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%      { transform: translateY(-16px) rotate(0.8deg); }
 }
 
-.slide-up.visible {
-  opacity: 1;
-  transform: translateY(0);
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
 }

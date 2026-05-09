@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Rating from "@mui/material/Rating";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -69,7 +70,6 @@ function AnimatedImageItem({ item, index, onClick }) {
         borderRadius: "2px",
         background: "#fff",
         transition: "all 0.25s ease",
-
         "&:hover": {
           transform: "translateY(-4px)",
         },
@@ -78,7 +78,7 @@ function AnimatedImageItem({ item, index, onClick }) {
         },
       }}
     >
-      <div className="relative w-full aspect-[4/5] overflow-hidden ">
+      <div className="relative w-full aspect-[3/5] overflow-hidden">
         <img
           src={item.imageUrl}
           alt={item.title}
@@ -88,35 +88,34 @@ function AnimatedImageItem({ item, index, onClick }) {
       </div>
 
       <div className="overlay absolute inset-0 opacity-0 transition-all bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-2">
-  <h3 className="text-white font-semibold text-[11px] sm:text-sm line-clamp-1">
-    {capitalizeFirstLetter(item.title)}
-  </h3>
+        <h3 className="text-white font-semibold text-[11px] sm:text-sm line-clamp-1">
+          {capitalizeFirstLetter(item.title)}
+        </h3>
 
-  <div className="flex items-center gap-1">
-    <Rating
-      value={item.rating}
-      readOnly
-      precision={0.5}
-      size="small"
-      sx={{
-        "& .MuiRating-iconFilled": {
-          color: "#ffb300",
-        },
+        <div className="flex items-center gap-1">
+          <Rating
+            value={item.rating}
+            readOnly
+            precision={0.5}
+            size="small"
+            sx={{
+              "& .MuiRating-iconFilled": {
+                color: "#ffb300",
+              },
+              "& .MuiSvgIcon-root": {
+                fontSize: {
+                  xs: "0.8rem",
+                  sm: "1rem",
+                },
+              },
+            }}
+          />
 
-        "& .MuiSvgIcon-root": {
-          fontSize: {
-            xs: "0.8rem",
-            sm: "1rem",
-          },
-        },
-      }}
-    />
-
-    <span className="text-[10px] sm:text-xs text-neutral-300">
-      {labels[item.rating]}
-    </span>
-  </div>
-</div>
+          <span className="text-[10px] sm:text-xs text-neutral-300">
+            {labels[item.rating]}
+          </span>
+        </div>
+      </div>
     </ImageListItem>
   );
 }
@@ -128,6 +127,9 @@ function DisplayComplete() {
 
   const emptyRef = useSlideUp(0);
   const galleryRef = useSlideUp(0);
+
+  // ✅ RESPONSIVE BREAKPOINT
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -172,7 +174,7 @@ function DisplayComplete() {
           style={{ maxWidth: 1000, margin: "0 auto" }}
         >
           <ImageList
-            cols={3}
+            cols={isMobile ? 3 : 4}   // ✅ RESPONSIVE FIX
             gap={2}
             sx={{
               width: "100%",
@@ -201,7 +203,6 @@ function DisplayComplete() {
             className="w-full max-w-5xl max-h-[94vh] overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top Bar */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
               <div>
                 <h2 className="text-2xl font-bold text-neutral-900">
@@ -221,12 +222,9 @@ function DisplayComplete() {
               </button>
             </div>
 
-            {/* Main Content */}
             <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
-              {/* Left Panel - Info */}
               <div className="lg:w-3/5 p-6 lg:p-8 flex flex-col gap-6 overflow-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Rating */}
                   <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
                     <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
                       YOUR RATING
@@ -245,25 +243,18 @@ function DisplayComplete() {
                     </div>
                   </div>
 
-                  {/* Date */}
                   <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
                     <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
                       COMPLETED ON
                     </p>
                     <p className="text-neutral-900 text-sm font-medium">
                       {selectedItem.date
-                        ? new Date(selectedItem.date).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })
+                        ? new Date(selectedItem.date).toLocaleDateString()
                         : "No date"}
                     </p>
                   </div>
                 </div>
 
-                {/* Description */}
                 <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
                   <p className="text-[11px] text-neutral-500 mb-3 font-medium tracking-widest">
                     MY EXPERIENCE
@@ -274,15 +265,13 @@ function DisplayComplete() {
                 </div>
               </div>
 
-              {/* Right Image - FIXED RESPONSIVE */}
               <div className="lg:w-2/5 bg-neutral-50 flex items-center justify-center p-6 border-l border-neutral-200">
                 <div className="w-full max-w-[420px] lg:max-w-none">
                   <div className="bg-white p-4 rounded-3xl shadow-sm border border-neutral-100">
                     <img
                       src={selectedItem.imageUrl}
                       alt={selectedItem.title}
-                      className="w-full h-auto max-h-[65vh] lg:max-h-[520px] 
-                                 object-contain rounded-2xl"
+                      className="w-full h-auto max-h-[65vh] lg:max-h-[520px] object-contain rounded-2xl"
                     />
                   </div>
                 </div>

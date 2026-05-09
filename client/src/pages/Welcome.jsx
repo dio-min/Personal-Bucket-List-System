@@ -7,7 +7,7 @@ import Logo from '../assets/logo.gif';
 function Welcome() {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-80">
+      <div className="w-80 animate-float">
         <BorderGlow
           edgeSensitivity={40}
           glowColor="210 100 80"
