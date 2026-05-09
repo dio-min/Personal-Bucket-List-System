@@ -34,8 +34,28 @@ function App() {
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-slate-800">
-        <p className="text-sm font-medium">Checking authentication status…</p>
-      </div>
+  <div className="flex flex-col items-center gap-3">
+    <svg
+      className="animate-spin size-6"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <circle
+        cx="12" cy="12" r="10"
+        stroke="#96bb7b"
+        strokeWidth="3"
+        strokeOpacity="0.25"
+      />
+      <path
+        d="M22 12a10 10 0 0 0-10-10"
+        stroke="#96bb7b"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+    <p className="text-sm font-medium">Checking authentication status…</p>
+  </div>
+</div>
     );
   }
 

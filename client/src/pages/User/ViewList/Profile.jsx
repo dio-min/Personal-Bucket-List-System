@@ -8,6 +8,33 @@ import { EllipsisVertical } from "@gravity-ui/icons";
 
 const auth = getAuth();
 
+function useSlideUp(delay = 0) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }, delay);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return ref;
+}
+
 function Profile() {
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
@@ -22,13 +49,14 @@ function Profile() {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  
+
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const cardRef = useSlideUp(0);
+
   const navigate = useNavigate();
 
-  // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -41,7 +69,6 @@ function Profile() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Fetch Profile (Avatar)
   useEffect(() => {
     if (!uid) return;
     const getUserProfile = async () => {
@@ -58,7 +85,6 @@ function Profile() {
     getUserProfile();
   }, [uid]);
 
-  // Fetch Completed Items for Badges
   useEffect(() => {
     if (!uid) return;
     const fetchCompletedItems = async () => {
@@ -74,7 +100,6 @@ function Profile() {
     fetchCompletedItems();
   }, [uid]);
 
-  // Set Badge
   useEffect(() => {
     if (items.length >= 25) setBadges("Adventurer");
     else if (items.length >= 10) setBadges("Explorer");
@@ -97,7 +122,6 @@ function Profile() {
       const formData = new FormData();
       formData.append("uid", uid);
       formData.append("avatar", image);
-
       const response = await axios.post(`${API_BASE_URL}/api/user/uploadAvatar`, formData);
       setUserAvatar(response.data?.profilePicture || preview);
       handleCancelUpload();
@@ -124,7 +148,6 @@ function Profile() {
     setUploading(true);
     try {
       await updateProfile(auth.currentUser, { displayName: newUsername });
-
       await axios.post(`${API_BASE_URL}/api/user/username`, {
         uid: uid,
         username: newUsername,
@@ -142,9 +165,9 @@ function Profile() {
   const handleDeleteUser = async () => {
     setDeleting(true);
     try {
-      await axios.post(`${API_BASE_URL}/api/user/isdeleted`, { 
-        uid: uid, 
-        isdelete: true 
+      await axios.post(`${API_BASE_URL}/api/user/isdeleted`, {
+        uid: uid,
+        isdelete: true,
       });
       await deleteUser(auth.currentUser);
       navigate("/");
@@ -158,7 +181,7 @@ function Profile() {
   };
 
   return (
-    <div className="flex justify-center items-center mt-8">
+    <div className="flex justify-center items-center mt-4 ml-4 mr-4">
       <input
         type="file"
         accept="image/*"
@@ -167,15 +190,19 @@ function Profile() {
         className="hidden"
       />
 
-      {/* Main Profile Card - Light Mode */}
+      {/* PROFILE CARD */}
       <div
-        className="flex p-6 rounded-2xl w-[580px] h-[150px] shadow-sm border relative"
+        ref={cardRef}
         style={{
-          backgroundColor: "white",
+          opacity: 0,
+          transform: "translateY(30px)",
+          transition: "opacity 0.55s ease 0ms, transform 0.55s ease 0ms",
+          backgroundColor: "rgba(255, 255, 255, 0.4)",
           borderColor: "#e5e5e5",
         }}
+        className="flex p-6 rounded-2xl w-[1000px] h-[150px] shadow-sm border relative"
       >
-        {/* Avatar with Plus Icon */}
+        {/* AVATAR */}
         <div className="relative mr-6 flex-shrink-0">
           {loading ? (
             <div
@@ -189,12 +216,12 @@ function Profile() {
               }}
             />
           ) : (
-            <div 
-              className="relative group cursor-pointer" 
+            <div
+              className="relative group cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <img
-                src={userAvatar || "/default-avatar.png"} // Add fallback if needed
+                src={userAvatar || "/default-avatar.png"}
                 alt="User Avatar"
                 style={{
                   width: "100px",
@@ -204,21 +231,8 @@ function Profile() {
                   border: "3px solid #e5e5e5",
                 }}
               />
-
-              {/* Plus Icon */}
-              <div className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1.5 shadow-md 
-                            opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="3" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
+              <div className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -227,7 +241,7 @@ function Profile() {
           )}
         </div>
 
-        {/* User Info & Menu */}
+        {/* USER INFO */}
         <div className="flex-1 flex flex-col">
           <div className="flex justify-between items-start">
             <div>
@@ -250,10 +264,7 @@ function Profile() {
                   <Dropdown.Item onPress={() => setShowUsernameModal(true)}>
                     <Label>Change Username</Label>
                   </Dropdown.Item>
-                  <Dropdown.Item
-                    variant="danger"
-                    onPress={() => setShowDeleteModal(true)}
-                  >
+                  <Dropdown.Item variant="danger" onPress={() => setShowDeleteModal(true)}>
                     <Label>Delete Account</Label>
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -263,9 +274,7 @@ function Profile() {
         </div>
       </div>
 
-      {/* ====================== Modals ====================== */}
-
-      {/* Avatar Upload Modal */}
+      {/* AVATAR MODAL */}
       {showAvatarModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -290,12 +299,12 @@ function Profile() {
             />
             <div className="flex gap-3 w-full mt-2">
               <button
-  onClick={handleUpload}
-  disabled={uploading}
-  className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
->
-  {uploading ? "Saving…" : "Save Changes"}
-</button>
+                onClick={handleUpload}
+                disabled={uploading}
+                className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
+              >
+                {uploading ? "Saving…" : "Save Changes"}
+              </button>
               <button
                 onClick={handleCancelUpload}
                 className="flex-1 py-3 rounded-xl font-medium text-gray-700 hover:bg-gray-100 transition-colors border border-gray-300"
@@ -307,7 +316,7 @@ function Profile() {
         </div>
       )}
 
-      {/* Username Update Modal */}
+      {/* USERNAME MODAL */}
       {showUsernameModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -328,12 +337,12 @@ function Profile() {
             />
             <div className="flex gap-3 w-full mt-2">
               <button
-  onClick={handleUpdateUsername}
-  disabled={uploading}
-  className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
->
-  {uploading ? "Saving…" : "Save Changes"}
-</button>
+                onClick={handleUpdateUsername}
+                disabled={uploading}
+                className="flex-1 py-3 rounded-xl bg-[#0f172b] hover:bg-[#111a33] active:bg-[#0b1224] disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium transition-colors duration-200"
+              >
+                {uploading ? "Saving…" : "Save Changes"}
+              </button>
               <button
                 onClick={handleCancelUpload}
                 className="flex-1 py-3 rounded-xl font-medium text-gray-700 hover:bg-gray-100 transition-colors border border-gray-300"
@@ -345,7 +354,7 @@ function Profile() {
         </div>
       )}
 
-      {/* Delete Account Modal */}
+      {/* DELETE MODAL */}
       {showDeleteModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"

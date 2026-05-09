@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Rating from "@mui/material/Rating";
@@ -20,10 +20,114 @@ function capitalizeFirstLetter(str) {
     : "";
 }
 
+function useSlideUp(delay = 0) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }, delay);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.08 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return ref;
+}
+
+const slideBase = (delay = 0) => ({
+  opacity: 0,
+  transform: "translateY(28px)",
+  transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+});
+
+/* Individual Image Item */
+function AnimatedImageItem({ item, index, onClick }) {
+  const ref = useSlideUp(index * 60);
+
+  return (
+    <ImageListItem
+      ref={ref}
+      className="group"
+      style={slideBase(index * 60)}
+      onClick={() => onClick(item)}
+      sx={{
+        cursor: "pointer",
+        overflow: "hidden",
+        borderRadius: "2px",
+        background: "#fff",
+        transition: "all 0.25s ease",
+
+        "&:hover": {
+          transform: "translateY(-4px)",
+        },
+        "&:hover .overlay": {
+          opacity: 1,
+        },
+      }}
+    >
+      <div className="relative w-full aspect-[4/5] overflow-hidden ">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
+
+      <div className="overlay absolute inset-0 opacity-0 transition-all bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-2">
+  <h3 className="text-white font-semibold text-[11px] sm:text-sm line-clamp-1">
+    {capitalizeFirstLetter(item.title)}
+  </h3>
+
+  <div className="flex items-center gap-1">
+    <Rating
+      value={item.rating}
+      readOnly
+      precision={0.5}
+      size="small"
+      sx={{
+        "& .MuiRating-iconFilled": {
+          color: "#ffb300",
+        },
+
+        "& .MuiSvgIcon-root": {
+          fontSize: {
+            xs: "0.8rem",
+            sm: "1rem",
+          },
+        },
+      }}
+    />
+
+    <span className="text-[10px] sm:text-xs text-neutral-300">
+      {labels[item.rating]}
+    </span>
+  </div>
+</div>
+    </ImageListItem>
+  );
+}
+
 function DisplayComplete() {
   const [items, setItems] = useState([]);
   const [uid, setUid] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const emptyRef = useSlideUp(0);
+  const galleryRef = useSlideUp(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -53,172 +157,140 @@ function DisplayComplete() {
   return (
     <div className="w-full flex justify-center px-4 py-8">
       {items.length === 0 ? (
-        <div className="w-full max-w-4xl h-[420px] rounded-[32px] bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center">
+        <div
+          ref={emptyRef}
+          style={slideBase(0)}
+          className="w-full max-w-4xl h-[420px] rounded-[32px] bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center"
+        >
           <span className="text-neutral-400">No completed items yet.</span>
         </div>
       ) : (
-        <ImageList
-          variant="masonry"
-          cols={3}
-          gap={10}
-          sx={{
-            width: "100%",
-            maxWidth: 1100,           // ← Reduced from 1300
-            margin: "0 auto",
-          }}
+        <div
+          ref={galleryRef}
+          style={slideBase(0)}
+          className="w-full"
+          style={{ maxWidth: 1000, margin: "0 auto" }}
         >
-          {items.map((item) => (
-            <ImageListItem
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              sx={{
-                cursor: "pointer",
-                borderRadius: "20px",
-                overflow: "hidden",
-                background: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.48)",
-                transition: "all 0.3s ease",
-
-                "&:hover img": { transform: "scale(1.05)" },
-                "&:hover .overlay": { opacity: 1 },
-              }}
-            >
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                loading="lazy"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "cover",
-                  borderRadius: "20px",
-                }}
+          <ImageList
+            cols={3}
+            gap={2}
+            sx={{
+              width: "100%",
+              margin: "0 auto",
+            }}
+          >
+            {items.map((item, index) => (
+              <AnimatedImageItem
+                key={item.id}
+                item={item}
+                index={index}
+                onClick={setSelectedItem}
               />
-
-              <div className="overlay absolute inset-0 opacity-0 transition-all bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6">
-                <h3 className="text-white font-semibold text-lg">
-                  {capitalizeFirstLetter(item.title)}
-                </h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <Rating
-                    value={item.rating}
-                    readOnly
-                    precision={0.5}
-                    size="small"
-                    sx={{ "& .MuiRating-iconFilled": { color: "#ffb300" } }}
-                  />
-                  <span className="text-sm text-neutral-300">
-                    {labels[item.rating]}
-                  </span>
-                </div>
-              </div>
-            </ImageListItem>
-          ))}
-        </ImageList>
+            ))}
+          </ImageList>
+        </div>
       )}
 
-      {/* LIGHT MODE MODAL */}
-{selectedItem && (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl p-4"
-    onClick={() => setSelectedItem(null)}
-  >
-    <div
-      className="w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-white border border-neutral-200 shadow-xl flex flex-col"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-900">
-            {capitalizeFirstLetter(selectedItem.title)}
-          </h2>
-
-          <div className="flex items-center gap-2 mt-1 text-emerald-600 font-medium text-sm">
-            <span>✓</span>
-            <span>Completed Goal</span>
-          </div>
-        </div>
-
-        <button
+      {/* MODAL */}
+      {selectedItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl p-4"
           onClick={() => setSelectedItem(null)}
-          className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center text-lg transition"
         >
-          ✕
-        </button>
-      </div>
+          <div
+            className="w-full max-w-5xl max-h-[94vh] overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-900">
+                  {capitalizeFirstLetter(selectedItem.title)}
+                </h2>
+                <div className="flex items-center gap-2 mt-1 text-emerald-600 font-medium text-sm">
+                  <span>✓</span>
+                  <span>Completed Goal</span>
+                </div>
+              </div>
 
-      {/* Main Content */}
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center text-xl transition"
+              >
+                ✕
+              </button>
+            </div>
 
-        {/* Left Panel */}
-        <div className="lg:w-3/5 p-6 flex flex-col gap-5 overflow-auto">
+            {/* Main Content */}
+            <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
+              {/* Left Panel - Info */}
+              <div className="lg:w-3/5 p-6 lg:p-8 flex flex-col gap-6 overflow-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Rating */}
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
+                    <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
+                      YOUR RATING
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Rating
+                        value={selectedItem.rating}
+                        readOnly
+                        precision={0.5}
+                        size="small"
+                        sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
+                      />
+                      <span className="text-base font-semibold text-neutral-900">
+                        {labels[selectedItem.rating]}
+                      </span>
+                    </div>
+                  </div>
 
-          {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Date */}
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
+                    <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
+                      COMPLETED ON
+                    </p>
+                    <p className="text-neutral-900 text-sm font-medium">
+                      {selectedItem.date
+                        ? new Date(selectedItem.date).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "No date"}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Rating */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-5">
-              <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                YOUR RATING
-              </p>
-              <div className="flex items-center gap-3">
-                <Rating
-                  value={selectedItem.rating}
-                  readOnly
-                  precision={0.5}
-                  size="small"
-                  sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
-                />
-                <span className="text-xm font-semibold text-neutral-900">
-                  {labels[selectedItem.rating]}
-                </span>
+                {/* Description */}
+                <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
+                  <p className="text-[11px] text-neutral-500 mb-3 font-medium tracking-widest">
+                    MY EXPERIENCE
+                  </p>
+                  <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                    {selectedItem.description || "No description provided."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Image - FIXED RESPONSIVE */}
+              <div className="lg:w-2/5 bg-neutral-50 flex items-center justify-center p-6 border-l border-neutral-200">
+                <div className="w-full max-w-[420px] lg:max-w-none">
+                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-neutral-100">
+                    <img
+                      src={selectedItem.imageUrl}
+                      alt={selectedItem.title}
+                      className="w-full h-auto max-h-[65vh] lg:max-h-[520px] 
+                                 object-contain rounded-2xl"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Date */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-5">
-              <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                COMPLETED ON
-              </p>
-              <p className="text-neutral-900 text-sm font-medium">
-                {selectedItem.date
-                  ? new Date(selectedItem.date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "No date"}
-              </p>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-xl p-6">
-            <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-              MY EXPERIENCE
-            </p>
-            <p className="text-neutral-700 leading-relaxed text-sm whitespace-pre-wrap">
-              {selectedItem.description || "No description provided."}
-            </p>
           </div>
         </div>
-
-        {/* Right Image */}
-        <div className="lg:w-2/5 bg-white flex items-center justify-center p-6 border-l border-neutral-200">
-          <div className="bg-white p-3 rounded-2xl shadow-sm border border-neutral-100">
-            <img
-              src={selectedItem.imageUrl}
-              alt={selectedItem.title}
-              className="max-h-[400px] w-full object-contain rounded-xl"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }

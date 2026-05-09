@@ -7,6 +7,7 @@ import { CirclePlusFill } from "@gravity-ui/icons";
 import API_BASE_URL from "../../lib/config";
 
 function AddItem() {
+  const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
@@ -60,19 +61,15 @@ function AddItem() {
         firestoreDocId: firestoreDoc.id,
       });
 
-      // Reset form
       setTitle("");
       setDescription("");
       setDate("");
       setCategory("");
       setSuccess("Goal added successfully!");
-      
-      // Optional: Auto close modal after success
-      setTimeout(() => {
-        setSuccess("");
-      }, 2000);
+      setIsOpen(false);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || "Failed to add item.";
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to add item.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -80,9 +77,9 @@ function AddItem() {
   };
 
   return (
-    <Modal>
+    <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
       {/* Trigger Button */}
-      <Button variant="default">
+      <Button variant="default" onClick={() => setIsOpen(true)}>
         <CirclePlusFill className="size-6" />
       </Button>
 
@@ -90,7 +87,6 @@ function AddItem() {
       <Modal.Backdrop className="bg-black/70 backdrop-blur-sm">
         <Modal.Container className="flex items-center justify-center min-h-screen px-4">
           <Modal.Dialog className="w-full max-w-lg p-8 bg-white border border-neutral-200 rounded-3xl shadow-2xl text-neutral-900">
-
             <Modal.CloseTrigger />
 
             <Modal.Header>
@@ -101,12 +97,13 @@ function AddItem() {
 
             <Modal.Body>
               <form onSubmit={handleAdd} className="space-y-6 mt-4">
-
                 {error && (
                   <p className="text-red-600 text-sm font-medium">{error}</p>
                 )}
                 {success && (
-                  <p className="text-emerald-600 text-sm font-medium">{success}</p>
+                  <p className="text-emerald-600 text-sm font-medium">
+                    {success}
+                  </p>
                 )}
 
                 {/* Title */}
@@ -171,13 +168,12 @@ function AddItem() {
 
                 {/* Submit Button */}
                 <button
-  type="submit"
-  disabled={loading}
-  className="w-full py-3.5 bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
->
-  {loading ? "Adding Goal..." : "Add to Bucketlist"}
-</button>
-
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
+                >
+                  {loading ? "Adding Goal..." : "Add to Bucketlist"}
+                </button>
               </form>
             </Modal.Body>
           </Modal.Dialog>

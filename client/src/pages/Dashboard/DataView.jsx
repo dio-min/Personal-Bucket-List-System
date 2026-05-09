@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import ViewList from "../User/ViewList";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../../lib/firebase";
@@ -30,18 +30,57 @@ ChartJS.register(
   Legend
 );
 
+/* ── shared slide-up hook ── */
+function useSlideUp(delay = 0) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }, delay);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return ref;
+}
+
+const slideBase = (delay = 0) => ({
+  opacity: 0,
+  transform: "translateY(30px)",
+  transition: `opacity 0.55s ease ${delay}ms, transform 0.55s ease ${delay}ms`,
+});
+
 function DataView() {
   const [rating, setRating] = useState(0);
   const [pendingGoals, setPendingGoals] = useState([]);
   const [completedGoals, setCompletedGoals] = useState([]);
   const [uid, setUid] = useState(null);
 
+  /* refs for animated sections */
+  const headingRef  = useSlideUp(0);
+  const statsRef    = useSlideUp(80);
+  const chartsRef   = useSlideUp(160);
+  const listRef     = useSlideUp(240);
+
   // AUTH
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUid(user?.uid ?? null);
     });
-
     return () => unsubscribeAuth();
   }, []);
 
@@ -66,21 +105,11 @@ function DataView() {
     );
 
     const unsubscribePending = onSnapshot(pendingQuery, (snapshot) => {
-      setPendingGoals(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
+      setPendingGoals(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
 
     const unsubscribeCompleted = onSnapshot(completedQuery, (snapshot) => {
-      setCompletedGoals(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
+      setCompletedGoals(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
 
     return () => {
@@ -92,7 +121,6 @@ function DataView() {
   // RATING API
   useEffect(() => {
     if (!uid) return;
-
     let isMounted = true;
 
     const fetchData = async () => {
@@ -103,50 +131,34 @@ function DataView() {
         );
 
         const data = res.data || [];
+        const ratings = data.map((item) => Number(item.rating)).filter((r) => !isNaN(r));
+        const average = ratings.length > 0
+          ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+          : 0;
 
-        const ratings = data
-          .map((item) => Number(item.rating))
-          .filter((r) => !isNaN(r));
-
-        const average =
-          ratings.length > 0
-            ? ratings.reduce((a, b) => a + b, 0) / ratings.length
-            : 0;
-
-        if (isMounted) {
-          setRating(Number(average.toFixed(1)));
-        }
+        if (isMounted) setRating(Number(average.toFixed(1)));
       } catch (error) {
         console.error("Error fetching ratings:", error);
       }
     };
 
     fetchData();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [uid]);
 
-  // TOTAL (memoized)
   const total = useMemo(
     () => pendingGoals.length + completedGoals.length,
     [pendingGoals, completedGoals]
   );
 
-  // STATS
   const stats = {
     totalGoals: total,
     completedGoals: completedGoals.length,
     pendingGoals: pendingGoals.length,
     averageRating: rating,
-    completionRate:
-      total > 0
-        ? Math.round((completedGoals.length / total) * 100)
-        : 0,
+    completionRate: total > 0 ? Math.round((completedGoals.length / total) * 100) : 0,
   };
 
-  // DOUGHNUT DATA
   const doughnutData = {
     labels: ["Completed", "Pending"],
     datasets: [
@@ -158,20 +170,17 @@ function DataView() {
     ],
   };
 
-  // CATEGORY COUNT
   const completedCategoryCounts = {};
   const pendingCategoryCounts = {};
 
   completedGoals.forEach((goal) => {
     const category = goal.category || "Uncategorized";
-    completedCategoryCounts[category] =
-      (completedCategoryCounts[category] || 0) + 1;
+    completedCategoryCounts[category] = (completedCategoryCounts[category] || 0) + 1;
   });
 
   pendingGoals.forEach((goal) => {
     const category = goal.category || "Uncategorized";
-    pendingCategoryCounts[category] =
-      (pendingCategoryCounts[category] || 0) + 1;
+    pendingCategoryCounts[category] = (pendingCategoryCounts[category] || 0) + 1;
   });
 
   const allCategories = [
@@ -182,38 +191,26 @@ function DataView() {
   ];
 
   const sortedCategories = allCategories.sort((a, b) => {
-    const totalA =
-      (completedCategoryCounts[a] || 0) +
-      (pendingCategoryCounts[a] || 0);
-
-    const totalB =
-      (completedCategoryCounts[b] || 0) +
-      (pendingCategoryCounts[b] || 0);
-
+    const totalA = (completedCategoryCounts[a] || 0) + (pendingCategoryCounts[a] || 0);
+    const totalB = (completedCategoryCounts[b] || 0) + (pendingCategoryCounts[b] || 0);
     return totalB - totalA;
   });
 
-  const safeCategories = sortedCategories.length
-    ? sortedCategories
-    : ["No Data"];
+  const safeCategories = sortedCategories.length ? sortedCategories : ["No Data"];
 
   const categoryData = {
     labels: safeCategories,
     datasets: [
       {
         label: "Completed",
-        data: safeCategories.map(
-          (c) => completedCategoryCounts[c] || 0
-        ),
+        data: safeCategories.map((c) => completedCategoryCounts[c] || 0),
         backgroundColor: "#86efac",
         borderRadius: 6,
         barThickness: 18,
       },
       {
         label: "Pending",
-        data: safeCategories.map(
-          (c) => pendingCategoryCounts[c] || 0
-        ),
+        data: safeCategories.map((c) => pendingCategoryCounts[c] || 0),
         backgroundColor: "#fde68a",
         borderRadius: 6,
         barThickness: 18,
@@ -224,9 +221,7 @@ function DataView() {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-    },
+    plugins: { legend: { display: false } },
     scales: {
       x: {
         ticks: { color: "#6b7280", font: { size: 11 } },
@@ -242,90 +237,95 @@ function DataView() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 text-gray-800">
-      <h1 className="text-xl font-semibold mb-5">
+
+      {/* HEADING */}
+      <h1
+        ref={headingRef}
+        style={slideBase(0)}
+        className="text-xl font-semibold mb-5"
+      >
         Dashboard Analytics
       </h1>
 
       {/* STATS */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 mb-5">
-        <StatCard title="Total Goals" value={stats.totalGoals} />
-        <StatCard title="Completed" value={stats.completedGoals} />
-        <StatCard title="Pending" value={stats.pendingGoals} />
-        <StatCard title="Avg Rating" value={stats.averageRating} />
-        <StatCard
-          title="Completion %"
-          value={`${stats.completionRate}%`}
-        />
+      <div
+        ref={statsRef}
+        style={slideBase(80)}
+        className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 mb-5"
+      >
+        <StatCard title="Total Goals"   value={stats.totalGoals}       delay={0}   />
+        <StatCard title="Completed"     value={stats.completedGoals}   delay={60}  />
+        <StatCard title="Pending"       value={stats.pendingGoals}     delay={120} />
+        <StatCard title="Avg Rating"    value={stats.averageRating}    delay={180} />
+        <StatCard title="Completion %"  value={`${stats.completionRate}%`} delay={240} />
       </div>
 
       {/* CHARTS */}
-      {/* CHARTS */}
-{/* CHARTS */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+      <div
+        ref={chartsRef}
+        style={slideBase(160)}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5"
+      >
+        {/* DOUGHNUT */}
+        <div className="bg-white/80 border rounded-xl p-4 h-64">
+          <h2 className="text-sm font-semibold mb-3">Goal Status</h2>
 
-  {/* DOUGHNUT */}
-  <div className="bg-white border rounded-xl p-4 h-64">
-  <h2 className="text-sm font-semibold mb-3">
-    Goal Status
-  </h2>
+          <div className="flex justify-center gap-4 mb-3 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-sm bg-[#86efac]" />
+              Completed: {stats.completedGoals}
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-sm bg-[#fde68a]" />
+              Pending: {stats.pendingGoals}
+            </div>
+          </div>
 
-  {/* LEGEND + VALUES */}
-  <div className="flex justify-center gap-4 mb-3 text-xs text-gray-600">
-    <div className="flex items-center gap-1">
-      <span className="w-2 h-2 rounded-sm bg-[#86efac]" />
-      Completed: {stats.completedGoals}
-    </div>
+          <div className="h-44">
+            <Doughnut
+              data={doughnutData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false, position: "bottom" } },
+              }}
+              style={{ margin: "auto", paddingBottom: "10px" }}
+            />
+          </div>
+        </div>
 
-    <div className="flex items-center gap-1">
-      <span className="w-2 h-2 rounded-sm bg-[#fde68a]" />
-      Pending: {stats.pendingGoals}
-    </div>
-  </div>
-
-  <div className="h-44">
-    <Doughnut
-      data={doughnutData}
-      options={{
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false, // ✅ enable legend
-            position: "bottom",
-            
-          },
-        },
-      }}
-      style={{margin:"auto", paddingBottom:"10px"}}
-    />
-  </div>
-</div>
-
-  {/* BAR */}
-  <div className="bg-white border rounded-xl p-4 h-64">
-    <h2 className="text-sm font-semibold mb-3">
-      Goals by Category
-    </h2>
-
-    <div className="h-48">
-      <Bar data={categoryData} options={chartOptions} />
-    </div>
-  </div>
-
-</div>
+        {/* BAR */}
+        <div className="bg-white/80 border rounded-xl p-4 h-64">
+          <h2 className="text-sm font-semibold mb-3">Goals by Category</h2>
+          <div className="h-48">
+            <Bar data={categoryData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
 
       {/* LIST */}
-      <div className="bg-white border rounded-xl p-4">
+      <div
+        ref={listRef}
+        style={slideBase(240)}
+        className="bg-white/80 border rounded-xl p-4"
+      >
         <h2 className="font-semibold mb-3">Your Bucketlist</h2>
         <ViewList />
       </div>
+
     </div>
   );
 }
 
-function StatCard({ title, value }) {
+function StatCard({ title, value, delay = 0 }) {
+  const ref = useSlideUp(delay);
+
   return (
-    <div className="bg-white border rounded-xl p-3">
+    <div
+      ref={ref}
+      style={slideBase(delay)}
+      className="bg-white/80 border rounded-xl p-3"
+    >
       <p className="text-xs text-gray-400">{title}</p>
       <p className="text-xl font-bold">{value}</p>
     </div>
