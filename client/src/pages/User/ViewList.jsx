@@ -21,10 +21,9 @@ import {
   Table,
   EmptyState,
   Dropdown,
+  Modal,
 } from "@heroui/react";
-import axios from "axios";
 import AddItem from "./AddItem";
-import API_BASE_URL from "../../lib/config";
 import { Update } from "./Update";
 import { Completed } from "./Completed";
 
@@ -63,7 +62,7 @@ function useSlideUp(delay = 0) {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(el);
@@ -74,11 +73,23 @@ function useSlideUp(delay = 0) {
 }
 
 const CATEGORY_STYLES = {
-  personal: { bg: "bg-violet-50", text: "text-violet-600", dot: "bg-violet-400" },
+  personal: {
+    bg: "bg-violet-50",
+    text: "text-violet-600",
+    dot: "bg-violet-400",
+  },
   career: { bg: "bg-blue-50", text: "text-blue-600", dot: "bg-blue-400" },
   travel: { bg: "bg-teal-50", text: "text-teal-600", dot: "bg-teal-400" },
-  health: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400" },
-  adventure: { bg: "bg-orange-50", text: "text-orange-600", dot: "bg-orange-400" },
+  health: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-600",
+    dot: "bg-emerald-400",
+  },
+  adventure: {
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    dot: "bg-orange-400",
+  },
   learning: { bg: "bg-amber-50", text: "text-amber-600", dot: "bg-amber-400" },
 };
 
@@ -101,7 +112,9 @@ function CategoryBadge({ category }) {
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}
+    >
       <span className={`size-1.5 rounded-full shrink-0 ${style.dot}`} />
       {category}
     </span>
@@ -111,7 +124,9 @@ function CategoryBadge({ category }) {
 function DetailRow({ label, value }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{label}</p>
+      <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
+        {label}
+      </p>
       <p className="text-gray-700 leading-relaxed">{value}</p>
     </div>
   );
@@ -127,11 +142,14 @@ function AnimatedRow({ goal, index, onView, onDelete }) {
     el.style.opacity = "0";
     el.style.transform = "translateY(12px)";
 
-    const timer = setTimeout(() => {
-      el.style.transition = "opacity 0.35s ease, transform 0.35s ease";
-      el.style.opacity = "1";
-      el.style.transform = "translateY(0)";
-    }, 40 + index * 55);
+    const timer = setTimeout(
+      () => {
+        el.style.transition = "opacity 0.35s ease, transform 0.35s ease";
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+      },
+      40 + index * 55,
+    );
 
     return () => clearTimeout(timer);
   }, [index]);
@@ -148,7 +166,9 @@ function AnimatedRow({ goal, index, onView, onDelete }) {
       </Table.Cell>
 
       <Table.Cell className="py-3.5">
-        <span className="font-medium text-gray-800 text-sm leading-snug">{goal.title}</span>
+        <span className="font-medium text-gray-800 text-sm leading-snug">
+          {goal.title}
+        </span>
       </Table.Cell>
 
       <Table.Cell className="py-3.5">
@@ -159,7 +179,7 @@ function AnimatedRow({ goal, index, onView, onDelete }) {
         <div className="flex items-center gap-1">
           <Button
             variant="default"
-            onClick={() => onView(goal.title)}
+            onClick={() => onView(goal)}
             className="rounded-xl bg-transparent hover:bg-blue-100 text-blue-500 min-w-0 p-1.5 transition-colors duration-150"
           >
             <CircleInfoFill className="size-4" />
@@ -185,12 +205,22 @@ function AnimatedRow({ goal, index, onView, onDelete }) {
                   </AlertDialog.Header>
                   <AlertDialog.Body>
                     <p className="text-sm text-gray-500">
-                      This will permanently delete <span className="font-medium text-gray-700">"{goal.title}"</span>.
+                      This will permanently delete{" "}
+                      <span className="font-medium text-gray-700">
+                        "{goal.title}"
+                      </span>
+                      .
                     </p>
                   </AlertDialog.Body>
                   <AlertDialog.Footer>
-                    <Button slot="close" variant="tertiary">Cancel</Button>
-                    <Button slot="close" variant="danger" onClick={() => onDelete(goal.id)}>
+                    <Button slot="close" variant="tertiary">
+                      Cancel
+                    </Button>
+                    <Button
+                      slot="close"
+                      variant="danger"
+                      onClick={() => onDelete(goal.id)}
+                    >
                       Delete
                     </Button>
                   </AlertDialog.Footer>
@@ -214,15 +244,69 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
         </div>
         <span className="text-xs text-gray-300 font-mono">#{index + 1}</span>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="default"
-          onClick={() => onView(goal.title)}
-          className="rounded-xl bg-blue-50 text-blue-500 p-2"
-        >
-          <CircleInfoFill className="size-4" />
-        </Button>
 
+      <div className="flex items-center gap-2">
+        {/* Info Modal — Modal is the trigger wrapper, its first child Button is the trigger */}
+        <Modal>
+          <Button
+            variant="default"
+            className="rounded-xl bg-blue-50 text-blue-500 p-2"
+            onClick={() => onView(goal)}
+          >
+            <CircleInfoFill className="size-4" />
+          </Button>
+          <Modal.Backdrop>
+            <Modal.Container>
+              <Modal.Dialog className="sm:max-w-[360px]">
+                <Modal.CloseTrigger />
+                <Modal.Header>
+                  <Modal.Icon className="bg-default text-foreground">
+                    <CircleInfoFill className="size-5" />
+                  </Modal.Icon>
+                  <Modal.Heading>Goal Details</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="text-xs max-h-[80vh] overflow-y-auto">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Tap outside or use close to dismiss.
+                  </p>
+                  <div className="space-y-3">
+                    <DetailRow label="Title" value={goal.title} />
+                    <DetailRow label="Description" value={goal.description} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <DetailRow label="Date" value={formatDate(goal.date)} />
+                      <DetailRow label="Category" value={goal.category} />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">
+                        Status
+                      </p>
+                      <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                        {goal.status}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-3 pt-3 sm:flex-row">
+                      <Completed
+                        id={goal.id}
+                        firebaseDocId={goal.firestoreDocId}
+                      />
+                      <Update
+                        id={goal.id}
+                        firebaseDocId={goal.firestoreDocId}
+                      />
+                    </div>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button className="w-full" slot="close">
+                    Continue
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
+
+        {/* Delete AlertDialog */}
         <AlertDialog>
           <Button
             variant="default"
@@ -230,7 +314,6 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
           >
             <TrashBin className="size-4" />
           </Button>
-
           <AlertDialog.Backdrop>
             <AlertDialog.Container>
               <AlertDialog.Dialog className="w-full max-w-md p-6 rounded-3xl border border-gray-200 bg-white shadow-2xl">
@@ -243,12 +326,22 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
                 </AlertDialog.Header>
                 <AlertDialog.Body>
                   <p className="text-sm text-gray-500">
-                    This will permanently remove <span className="font-medium text-gray-700">{goal.title}</span> from your bucket list.
+                    This will permanently remove{" "}
+                    <span className="font-medium text-gray-700">
+                      {goal.title}
+                    </span>{" "}
+                    from your bucket list.
                   </p>
                 </AlertDialog.Body>
                 <AlertDialog.Footer>
-                  <Button slot="close" variant="tertiary">Cancel</Button>
-                  <Button slot="close" variant="danger" onClick={() => onDelete(goal.id)}>
+                  <Button slot="close" variant="tertiary">
+                    Cancel
+                  </Button>
+                  <Button
+                    slot="close"
+                    variant="danger"
+                    onClick={() => onDelete(goal.id)}
+                  >
                     Delete
                   </Button>
                 </AlertDialog.Footer>
@@ -261,47 +354,6 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
   );
 }
 
-function GoalDetails({ goal, onClose }) {
-  return (
-    <Card className="w-full rounded-[32px] bg-white shadow-2xl overflow-hidden">
-      <Card.Header className="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-200">
-        <div>
-          <Card.Title className="text-lg font-semibold text-gray-900">Goal Details</Card.Title>
-          <p className="text-sm text-gray-500">Tap outside or use close to dismiss.</p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Close goal details"
-        >
-          ×
-        </button>
-      </Card.Header>
-      <Card.Content className="p-6 max-h-[80vh] overflow-y-auto text-xs">
-        <div className="space-y-3">
-          <DetailRow label="Title" value={goal.title} />
-          <DetailRow label="Description" value={goal.description} />
-          <div className="grid grid-cols-2 gap-4">
-            <DetailRow label="Date" value={formatDate(goal.date)} />
-            <DetailRow label="Category" value={goal.category} />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Status</p>
-            <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-              {goal.status}
-            </span>
-          </div>
-          <div className="flex flex-col gap-3 pt-3 sm:flex-row">
-            <Completed id={goal.id} firebaseDocId={goal.firestoreDocId} />
-            <Update id={goal.id} firebaseDocId={goal.firestoreDocId} />
-          </div>
-        </div>
-      </Card.Content>
-    </Card>
-  );
-}
-
 function ViewList() {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -310,16 +362,30 @@ function ViewList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedGoal, setSelectedGoal] = useState(null);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const leftRef = useSlideUp(0);
-  const rightRef = useSlideUp(150);
 
   const slideBaseStyle = {
     opacity: 0,
     transform: "translateY(40px)",
     transition: "opacity 0.6s ease, transform 0.6s ease",
   };
+
+  // Inject keyframe once for the desktop panel slide-up
+  useEffect(() => {
+    const id = "slide-up-keyframe";
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -329,9 +395,7 @@ function ViewList() {
   }, []);
 
   useEffect(() => {
-    if (!uid) {
-      return;
-    }
+    if (!uid) return;
 
     const timer = setTimeout(() => {
       setError(null);
@@ -342,7 +406,7 @@ function ViewList() {
       collection(db, "bucketlist"),
       where("firebaseUid", "==", uid),
       where("status", "==", "in-progress"),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     const unsub = onSnapshot(
@@ -354,7 +418,7 @@ function ViewList() {
       (err) => {
         setError("Failed to load goals: " + err.message);
         setLoading(false);
-      }
+      },
     );
 
     return () => {
@@ -379,27 +443,18 @@ function ViewList() {
     });
   }, [goals, searchTerm, categoryFilter]);
 
-  const viewGoalDetails = async (title) => {
-    try {
-      const { data } = await axios.post(`${API_BASE_URL}/api/goal/getItemsByTitle`, { title });
-      const goal = data?.items?.[0];
-      if (!goal) {
-        alert("No details found for this goal.");
-        return;
-      }
-      setSelectedGoal({
-        title: goal.title || "Untitled Goal",
-        firestoreDocId: goal.firestoreDocId || "N/A",
-        description: goal.description || "No description provided",
-        date: goal.date || "Not specified",
-        category: goal.category || "Uncategorized",
-        status: goal.status || "Pending",
-        id: goal.id || "N/A",
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Failed to fetch goal details.");
-    }
+  // Only used on desktop to populate the side panel
+  const viewGoalDetails = (goal) => {
+    if (!goal) return;
+    setSelectedGoal({
+      title: goal.title || "Untitled Goal",
+      firestoreDocId: goal.firestoreDocId || goal.id || "N/A",
+      description: goal.description || "No description provided",
+      date: goal.date || "Not specified",
+      category: goal.category || "Uncategorized",
+      status: goal.status || "Pending",
+      id: goal.id || "N/A",
+    });
   };
 
   const handleDelete = async (id) => {
@@ -417,7 +472,7 @@ function ViewList() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row">
+    <div className="flex flex-col md:flex-row">
       <div ref={leftRef} style={slideBaseStyle} className="flex-1 min-w-0">
         <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-end">
           <div className="flex-1 w-full">
@@ -425,11 +480,18 @@ function ViewList() {
               <Label>Search</Label>
               <SearchField.Group className="bg-white/80 border border-gray-200 rounded-2xl">
                 <SearchField.SearchIcon />
-                <SearchField.Input className="w-full text-sm" placeholder="Search by title or category" />
+                <SearchField.Input
+                  className="w-full text-sm"
+                  placeholder="Search by title or category"
+                />
                 <SearchField.ClearButton />
 
                 <Dropdown>
-                  <Button aria-label="Filter" variant="default" className="rounded-xl bg-transparent hover:bg-gray-100 min-w-0">
+                  <Button
+                    aria-label="Filter"
+                    variant="default"
+                    className="rounded-xl bg-transparent hover:bg-gray-100 min-w-0"
+                  >
                     <Funnel className="size-5 text-gray-500" />
                   </Button>
                   <Dropdown.Popover>
@@ -454,7 +516,7 @@ function ViewList() {
           </div>
         ) : (
           <>
-            {isMobile ? (
+            {!isDesktop ? (
               <div className="flex flex-col gap-3">
                 {filteredGoals.length === 0 ? (
                   <EmptyState className="flex h-64 w-full flex-col items-center justify-center text-center gap-3 py-16">
@@ -483,7 +545,10 @@ function ViewList() {
                     <Table.Content aria-label="Bucketlist">
                       <Table.Header className="sticky top-0 z-10 bg-gray-50/95 backdrop-blur-md border-b border-gray-100">
                         <Table.Column className="w-8 pr-0" />
-                        <Table.Column isRowHeader className="text-gray-400 text-[11px] uppercase tracking-widest font-semibold py-3">
+                        <Table.Column
+                          isRowHeader
+                          className="text-gray-400 text-[11px] uppercase tracking-widest font-semibold py-3"
+                        >
                           Title
                         </Table.Column>
                         <Table.Column className="text-gray-400 text-[11px] uppercase tracking-widest font-semibold py-3">
@@ -524,36 +589,61 @@ function ViewList() {
         )}
       </div>
 
-      {!isMobile && (
-        <div ref={rightRef} style={slideBaseStyle} className="w-full lg:w-[360px] shrink-0">
+      {/* Desktop side panel */}
+      {isDesktop && (
+        <div
+          key="desktop-panel"
+          className="w-full md:w-[360px] shrink-0 animate-slide-up"
+          style={{
+            animation: "slideUp 0.5s ease forwards",
+          }}
+        >
           <Card className="h-[490px] bg-white/75 backdrop-blur-2xl border-grey/10 rounded-[32px] overflow-hidden">
             <Card.Header className="px-6 py-2 border-b border-gray-100">
-              <Card.Title className="text-s font-bold text-gray-800">Goal Details</Card.Title>
+              <Card.Title className="text-s font-bold text-gray-800">
+                Goal Details
+              </Card.Title>
             </Card.Header>
             <Card.Content className="p-6 overflow-auto h-full text-xs">
               {selectedGoal ? (
-                <div className="space-y-3">
+                <div className="space-y-3 whitespace-pre-wrap">
                   <DetailRow label="Title" value={selectedGoal.title} />
-                  <DetailRow label="Description" value={selectedGoal.description} />
+                  <DetailRow
+                    label="Description"
+                    value={selectedGoal.description}
+                  />
                   <div className="grid grid-cols-2 gap-4">
-                    <DetailRow label="Date" value={formatDate(selectedGoal.date)} />
+                    <DetailRow
+                      label="Date"
+                      value={formatDate(selectedGoal.date)}
+                    />
                     <DetailRow label="Category" value={selectedGoal.category} />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">Status</p>
+                    <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">
+                      Status
+                    </p>
                     <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
                       {selectedGoal.status}
                     </span>
                   </div>
                   <div className="flex gap-3 pt-3">
-                    <Completed id={selectedGoal.id} firebaseDocId={selectedGoal.firestoreDocId} />
-                    <Update id={selectedGoal.id} firebaseDocId={selectedGoal.firestoreDocId} />
+                    <Completed
+                      id={selectedGoal.id}
+                      firebaseDocId={selectedGoal.firestoreDocId}
+                    />
+                    <Update
+                      id={selectedGoal.id}
+                      firebaseDocId={selectedGoal.firestoreDocId}
+                    />
                   </div>
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-center">
                   <div>
-                    <p className="text-lg font-semibold text-gray-500">No Goal Selected</p>
+                    <p className="text-lg font-semibold text-gray-500">
+                      No Goal Selected
+                    </p>
                     <p className="text-sm text-gray-400 mt-2">
                       Select a goal from the list
                       <br />
@@ -564,19 +654,6 @@ function ViewList() {
               )}
             </Card.Content>
           </Card>
-        </div>
-      )}
-
-      {selectedGoal && isMobile && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
-          onClick={() => setSelectedGoal(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-xl">
-            <GoalDetails goal={selectedGoal} onClose={() => setSelectedGoal(null)} />
-          </div>
         </div>
       )}
     </div>

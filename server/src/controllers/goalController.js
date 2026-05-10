@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Item = require('../models/Item');
 const asyncHandler = require("express-async-handler");
 
@@ -89,18 +90,23 @@ const getbyTitle = asyncHandler(async (req, res) => {
 
 // update item by firestoreDocId
 const updateDocument = asyncHandler(async (req, res) => {
-const {documentID, title, category, date, description} = req.body;
+  const { documentID, firestoreDocId, title, category, date, description } = req.body;
 
   console.log("Incoming:", req.body);
 
-  if (!documentID) {
-    return res.status(400).json({ message: "documentID is required" });
+  const lookupId = documentID || firestoreDocId;
+  if (!lookupId) {
+    return res.status(400).json({ message: "documentID or firestoreDocId is required" });
   }
 
+  const query = mongoose.Types.ObjectId.isValid(lookupId)
+    ? { $or: [{ _id: lookupId }, { firestoreDocId: lookupId }] }
+    : { firestoreDocId: lookupId };
+
   try {
-    const updatedItem = await Item.findByIdAndUpdate(
-      documentID, // ✅ correct ID
-      { title, category, date, description }, // ✅ direct fields
+    const updatedItem = await Item.findOneAndUpdate(
+      query,
+      { title, category, date, description },
       { new: true, runValidators: true }
     );
 
@@ -109,9 +115,7 @@ const {documentID, title, category, date, description} = req.body;
     }
 
     console.log("✅ Updated:", updatedItem._id);
-
-    res.json(updatedItem); // ✅ SEND RESPONSE
-
+    res.json(updatedItem);
   } catch (error) {
     console.error("❌ Update error:", error);
     res.status(500).json({ message: error.message });
@@ -121,29 +125,32 @@ const {documentID, title, category, date, description} = req.body;
 const getItembyID = asyncHandler(async (req, res) => {
   const { dbid } = req.body;
 
-  let items = await Item.find({ _id: dbid });
-
-  if (items.length === 0) {
-    return res.status(404).json({ message: 'No items found with the given ID.' });
-  }
-
   if (!dbid) {
     return res.status(400).json({ message: 'ID is required.' });
   }
 
+  const query = mongoose.Types.ObjectId.isValid(dbid)
+    ? { $or: [{ _id: dbid }, { firestoreDocId: dbid }] }
+    : { firestoreDocId: dbid };
+
+  const item = await Item.findOne(query);
+
+  if (!item) {
+    return res.status(404).json({ message: 'No items found with the given ID.' });
+  }
+
   res.status(200).json({
-    message: "Items retrieved successfully",
-    items: items.map(item => ({
+    message: "Item retrieved successfully",
+    item: {
       title: item.title,
-      
+      description: item.description,
+      date: item.date,
+      category: item.category,
       status: item.status,
-      
-      
-  })) });
-
-
-  
-
+      id: item._id,
+      firestoreDocId: item.firestoreDocId,
+    },
+  });
 });
 
 const updateStatus = asyncHandler(async (req, res) => {

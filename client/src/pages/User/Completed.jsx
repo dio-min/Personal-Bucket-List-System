@@ -83,12 +83,36 @@ export const Completed = ({ id, firebaseDocId }) => {
   };
 
   const handleComplete = async () => {
+    const apiId = firebaseDocId || id;
+    if (!apiId) {
+      alert("Missing goal reference.");
+      return;
+    }
+
+    const localGoal = goals.find(
+      (goal) =>
+        goal.id === apiId ||
+        goal.firestoreDocId === apiId ||
+        goal.firestoreDocId === id,
+    );
+
+    if (localGoal) {
+      setSelectedGoal({ title: localGoal.title || "Untitled Goal" });
+      setDate(new Date().toISOString().split("T")[0]);
+      setNotes("");
+      setImage(null);
+      setPreview(null);
+      setRating(0);
+      setError("");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/goal/getItemByID`,
-        { dbid: id },
+        { dbid: apiId },
       );
-      const goal = response.data?.items?.[0];
+      const goal = response.data?.item;
 
       if (!goal) {
         alert("No details found for this goal.");
@@ -115,6 +139,11 @@ export const Completed = ({ id, firebaseDocId }) => {
       return;
     }
 
+    if (!selectedGoal?.title) {
+      alert("Unable to complete goal. Goal details are missing.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -127,7 +156,7 @@ export const Completed = ({ id, firebaseDocId }) => {
       formData.append("title", selectedGoal.title);
       formData.append("description", notes);
       formData.append("date", date);
-      formData.append("itemID", id);
+      formData.append("itemID", firebaseDocId || id);
       formData.append("rating", rating);
       formData.append("image", image);
       formData.append("firebaseUid", firebaseUid);

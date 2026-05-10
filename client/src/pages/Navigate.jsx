@@ -58,8 +58,8 @@ function Navigate() {
                       text-sm font-semibold transition-all duration-200
                       ${
                         active
-                          ? "text-slate-900 bg-white/30"
-                          : "text-slate-800 hover:bg-white/40 hover:text-slate-900"
+                          ? "text-slate-900"
+                          : "text-slate-800 hover:text-slate-900"
                       }
                     `}
                   >

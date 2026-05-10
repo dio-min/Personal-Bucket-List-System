@@ -73,13 +73,14 @@ export const Update = ({ id, firebaseDocId }) => {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    if (!firebaseDocId) {
+    const requestId = firebaseDocId || id;
+    if (!requestId) {
       alert("No goal ID provided");
       return;
     }
 
     try {
-      const goalRef = doc(db, "bucketlist", firebaseDocId);
+      const goalRef = doc(db, "bucketlist", firebaseDocId || id);
       await updateDoc(goalRef, {
         title,
         category,
@@ -88,7 +89,8 @@ export const Update = ({ id, firebaseDocId }) => {
       });
 
       await axios.put(`${API_BASE_URL}/api/goal/updateDocument`, {
-        documentID: id,
+        documentID: requestId,
+        firestoreDocId: firebaseDocId,
         title,
         category,
         date,
