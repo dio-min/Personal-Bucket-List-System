@@ -59,16 +59,26 @@ export const Update = ({ id, firebaseDocId }) => {
 
   // Load selected goal data
   useEffect(() => {
-    if (firebaseDocId && goals.length > 0) {
-      const goalToEdit = goals.find((goal) => goal.id === firebaseDocId);
-      if (goalToEdit) {
-        setTitle(goalToEdit.title || "");
-        setCategory(goalToEdit.category || "");
-        setDate(goalToEdit.date || "");
-        setDescription(goalToEdit.description || "");
-      }
+    if (!goals.length) return;
+
+    const lookupId = firebaseDocId || id;
+    if (!lookupId) return;
+
+    const goalToEdit = goals.find(
+      (goal) =>
+        goal.id === lookupId ||
+        goal.firestoreDocId === lookupId ||
+        goal.firestoreDocId === firebaseDocId ||
+        goal.id === firebaseDocId,
+    );
+
+    if (goalToEdit) {
+      setTitle(goalToEdit.title || "");
+      setCategory(goalToEdit.category || "");
+      setDate(goalToEdit.date || "");
+      setDescription(goalToEdit.description || "");
     }
-  }, [firebaseDocId, goals]);
+  }, [firebaseDocId, id, goals]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();

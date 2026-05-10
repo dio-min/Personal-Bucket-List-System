@@ -134,6 +134,7 @@ export const Completed = ({ id, firebaseDocId }) => {
 
   const handlemarkAsDone = async (e) => {
     e.preventDefault();
+
     if (rating === 0 || !date || !notes.trim() || !image) {
       alert("Please fill all fields, add a rating and upload a photo.");
       return;
@@ -144,11 +145,16 @@ export const Completed = ({ id, firebaseDocId }) => {
       return;
     }
 
-    setLoading(true);
+    const docId = firebaseDocId || id;
+    if (!docId) {
+      alert("Unable to complete goal. Goal reference is missing.");
+      return;
+    }
 
     try {
+      setLoading(true);
       // Update Firestore status
-      await updateDoc(doc(db, "bucketlist", firebaseDocId), {
+      await updateDoc(doc(db, "bucketlist", docId), {
         status: "completed",
       });
 
@@ -156,7 +162,7 @@ export const Completed = ({ id, firebaseDocId }) => {
       formData.append("title", selectedGoal.title);
       formData.append("description", notes);
       formData.append("date", date);
-      formData.append("itemID", firebaseDocId || id);
+      formData.append("itemID", docId);
       formData.append("rating", rating);
       formData.append("image", image);
       formData.append("firebaseUid", firebaseUid);
@@ -165,9 +171,9 @@ export const Completed = ({ id, firebaseDocId }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Goal completed successfully!");
+      
       setIsOpen(false);
-      window.location.reload();
+      
     } catch (error) {
       console.error(error);
       alert("Failed to save completion.");
@@ -180,14 +186,14 @@ export const Completed = ({ id, firebaseDocId }) => {
     <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
       {/* Trigger Button */}
       <Button
-  className="bg-[#0f172b] text-white border border-neutral-300 hover:bg-[#111a33] active:bg-[#0b1224] font-medium transition-colors"
-  onClick={() => {
-    setIsOpen(true);
-    handleComplete();
-  }}
->
-  Mark as Done
-</Button>
+        className="bg-[#0f172b] text-white border border-neutral-300 hover:bg-[#111a33] active:bg-[#0b1224] font-medium transition-colors"
+        onClick={() => {
+          setIsOpen(true);
+          handleComplete();
+        }}
+      >
+        Mark as Done
+      </Button>
 
       {/* Backdrop & Dialog */}
       <Modal.Backdrop className="bg-black/60 backdrop-blur-md">
@@ -295,12 +301,12 @@ export const Completed = ({ id, firebaseDocId }) => {
                     </div>
 
                     <Button
-  type="submit"
-  className="w-full bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white font-semibold py-3 rounded-2xl transition-colors"
-  disabled={loading}
->
-  {loading ? "Saving..." : "Save Completion"}
-</Button>
+                      type="submit"
+                      className="w-full bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] text-white font-semibold py-3 rounded-2xl transition-colors"
+                      disabled={loading}
+                    >
+                      {loading ? "Saving..." : "Save Completion"}
+                    </Button>
                   </form>
                 </div>
 

@@ -266,9 +266,7 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
                   <Modal.Heading>Goal Details</Modal.Heading>
                 </Modal.Header>
                 <Modal.Body className="text-xs max-h-[80vh] overflow-y-auto">
-                  <p className="text-sm text-gray-500 mb-4">
-                    Tap outside or use close to dismiss.
-                  </p>
+                  
                   <div className="space-y-3">
                     <DetailRow label="Title" value={goal.title} />
                     <DetailRow label="Description" value={goal.description} />
@@ -284,7 +282,7 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
                         {goal.status}
                       </span>
                     </div>
-                    <div className="flex flex-col gap-3 pt-3 sm:flex-row">
+                    <div className="flex justify-between gap-3 pt-3 sm:flex-row">
                       <Completed
                         id={goal.id}
                         firebaseDocId={goal.firestoreDocId}
@@ -296,11 +294,7 @@ function MobileGoalCard({ goal, index, onView, onDelete }) {
                     </div>
                   </div>
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button className="w-full" slot="close">
-                    Continue
-                  </Button>
-                </Modal.Footer>
+                
               </Modal.Dialog>
             </Modal.Container>
           </Modal.Backdrop>

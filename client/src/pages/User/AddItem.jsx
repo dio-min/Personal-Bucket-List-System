@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { db, auth } from "../../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 import { Button, Modal } from "@heroui/react";
 import { CirclePlusFill } from "@gravity-ui/icons";
@@ -51,6 +51,10 @@ function AddItem() {
         createdAt: serverTimestamp(),
       });
 
+      await updateDoc(doc(db, "bucketlist", firestoreDoc.id), {
+        firestoreDocId: firestoreDoc.id,
+      });
+
       await axios.post(`${API_BASE_URL}/api/goal/addItem`, {
         title,
         description,
@@ -65,7 +69,7 @@ function AddItem() {
       setDescription("");
       setDate("");
       setCategory("");
-      setSuccess("Goal added successfully!");
+      
       setIsOpen(false);
     } catch (err) {
       const errorMessage =

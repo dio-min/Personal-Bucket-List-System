@@ -10,9 +10,16 @@ import axios from "axios";
 import API_BASE_URL from "../../../lib/config";
 
 const labels = {
-  0.5: "Useless", 1: "Useless+", 1.5: "Poor", 2: "Poor+",
-  2.5: "Ok", 3: "Ok+", 3.5: "Good", 4: "Good+",
-  4.5: "Excellent", 5: "Excellent+",
+  0.5: "Useless",
+  1: "Useless+",
+  1.5: "Poor",
+  2: "Poor+",
+  2.5: "Ok",
+  3: "Ok+",
+  3.5: "Good",
+  4: "Good+",
+  4.5: "Excellent",
+  5: "Excellent+",
 };
 
 function capitalizeFirstLetter(str) {
@@ -38,7 +45,7 @@ function useSlideUp(delay = 0) {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.08 }
+      { threshold: 0.08 },
     );
 
     observer.observe(el);
@@ -145,7 +152,7 @@ function DisplayComplete() {
       try {
         const res = await axios.post(
           `${API_BASE_URL}/api/complete/getCompleteByUser`,
-          { firebaseUid: uid }
+          { firebaseUid: uid },
         );
         setItems(res.data);
       } catch (error) {
@@ -174,7 +181,7 @@ function DisplayComplete() {
           style={{ maxWidth: 1000, margin: "0 auto" }}
         >
           <ImageList
-            cols={isMobile ? 3 : 4}   // ✅ RESPONSIVE FIX
+            cols={isMobile ? 3 : 4} // ✅ RESPONSIVE FIX
             gap={2}
             sx={{
               width: "100%",
@@ -195,91 +202,105 @@ function DisplayComplete() {
 
       {/* MODAL */}
       {selectedItem && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl p-4"
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl p-2"
+    onClick={() => setSelectedItem(null)}
+  >
+    <div
+      className="w-full max-w-2xl max-h-[94vh] overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-2xl flex flex-col"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 sm:px-6 py-3 border-b border-neutral-100">
+        <h2 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-900">
+          Completed Goal
+        </h2>
+
+        <button
           onClick={() => setSelectedItem(null)}
+          className="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center text-lg transition"
         >
-          <div
-            className="w-full max-w-5xl max-h-[94vh] overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
-              <div>
-                <h2 className="text-2xl font-bold text-neutral-900">
-                  {capitalizeFirstLetter(selectedItem.title)}
-                </h2>
-                <div className="flex items-center gap-2 mt-1 text-emerald-600 font-medium text-sm">
-                  <span>✓</span>
-                  <span>Completed Goal</span>
-                </div>
-              </div>
+          ✕
+        </button>
+      </div>
 
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center text-xl transition"
-              >
-                ✕
-              </button>
-            </div>
+      {/* BODY */}
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
 
-            <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
-              <div className="lg:w-3/5 p-6 lg:p-8 flex flex-col gap-6 overflow-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
-                    <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                      YOUR RATING
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Rating
-                        value={selectedItem.rating}
-                        readOnly
-                        precision={0.5}
-                        size="small"
-                        sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
-                      />
-                      <span className="text-base font-semibold text-neutral-900">
-                        {labels[selectedItem.rating]}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5">
-                    <p className="text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                      COMPLETED ON
-                    </p>
-                    <p className="text-neutral-900 text-sm font-medium">
-                      {selectedItem.date
-                        ? new Date(selectedItem.date).toLocaleDateString()
-                        : "No date"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl p-6">
-                  <p className="text-[11px] text-neutral-500 mb-3 font-medium tracking-widest">
-                    MY EXPERIENCE
-                  </p>
-                  <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap">
-                    {selectedItem.description || "No description provided."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="lg:w-2/5 bg-neutral-50 flex items-center justify-center p-6 border-l border-neutral-200">
-                <div className="w-full max-w-[420px] lg:max-w-none">
-                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-neutral-100">
-                    <img
-                      src={selectedItem.imageUrl}
-                      alt={selectedItem.title}
-                      className="w-full h-auto max-h-[65vh] lg:max-h-[520px] object-contain rounded-2xl"
-                    />
-                  </div>
-                </div>
-              </div>
+        {/* IMAGE SIDE */}
+        <div className="lg:w-2/5 bg-neutral-50 flex items-center justify-center p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-neutral-200">
+          <div className="w-full max-w-[400px]">
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden">
+              <img
+                src={selectedItem.imageUrl}
+                alt={selectedItem.title}
+                className="w-full h-auto max-h-[55vh] object-cover"
+              />
             </div>
           </div>
         </div>
-      )}
+
+        {/* CONTENT SIDE */}
+        <div className="lg:w-3/5 p-5 sm:p-6 lg:p-8 flex flex-col gap-6 overflow-auto">
+
+          {/* TITLE INSIDE CONTENT (optional, cleaner placement) */}
+          <p className="text-base sm:text-lg px-5 lg:text-xl font-bold text-neutral-900">
+            {capitalizeFirstLetter(selectedItem.title)}
+          </p>
+
+          {/* STATS ROW */}
+          <div className="grid grid-cols-2 gap-3">
+
+            {/* RATING */}
+            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sm:p-5">
+              <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
+                YOUR RATING
+              </p>
+
+              <Rating
+                value={selectedItem.rating}
+                readOnly
+                precision={0.5}
+                size="small"
+                sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
+              />
+            </div>
+
+            {/* DATE */}
+            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sm:p-5">
+              <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
+                COMPLETED ON
+              </p>
+
+              <p className="text-xs sm:text-sm font-medium text-neutral-900">
+                {selectedItem.date
+                  ? new Date(selectedItem.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "No date"}
+              </p>
+            </div>
+
+          </div>
+
+          {/* DESCRIPTION */}
+          <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl p-5 sm:p-6">
+            <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-3 font-medium tracking-widest">
+              MY EXPERIENCE
+            </p>
+
+            <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+              {selectedItem.description || "No description provided."}
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
