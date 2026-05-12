@@ -215,7 +215,7 @@ function DisplayComplete() {
               <img
                 src={selectedItem.imageUrl}
                 alt={selectedItem.title}
-                className="w-full max-h-72 object-cover"
+                className="w-full max-h-82 object-cover"
               />
               <button
                 onClick={() => setSelectedItem(null)}
