@@ -203,11 +203,11 @@ function DisplayComplete() {
       {/* MODAL */}
       {selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl bg-white overflow-hidden shadow-xl"
+            className="w-full max-w-sm rounded-2xl bg-white overflow-hidden shadow-xl max-h-[90dvh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* IMAGE + CLOSE + TITLE OVERLAY */}
@@ -231,7 +231,7 @@ function DisplayComplete() {
             </div>
 
             {/* CONTENT */}
-            <div className="p-5 flex flex-col gap-4">
+            <div className="p-5 flex flex-col gap-4 overflow-y-auto">
               {/* STATS ROW */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-neutral-50 rounded-xl p-3">
