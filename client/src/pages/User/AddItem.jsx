@@ -2,7 +2,7 @@ import { useState } from "react";
 import { db, auth } from "../../lib/firebase";
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
-import { Button, Modal } from "@heroui/react";
+import { Button, Modal} from "@heroui/react";
 import { CirclePlusFill } from "@gravity-ui/icons";
 import API_BASE_URL from "../../lib/config";
 
@@ -71,6 +71,9 @@ function AddItem() {
       setCategory("");
       
       setIsOpen(false);
+      
+      alert("Goal added successfully!");
+      
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || err.message || "Failed to add item.";
@@ -175,6 +178,7 @@ function AddItem() {
                   type="submit"
                   disabled={loading}
                   className="w-full py-3.5 bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:bg-neutral-300 disabled:text-neutral-500 rounded-2xl font-semibold text-white transition-all duration-200 text-base mt-2"
+                 
                 >
                   {loading ? "Adding Goal..." : "Add to Bucketlist"}
                 </button>

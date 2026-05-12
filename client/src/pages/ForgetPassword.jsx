@@ -28,7 +28,7 @@ function ForgetPassword() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-80">
+      <div className="w-80 animate-float">
         <BorderGlow
           edgeSensitivity={40}
           glowColor="240 80 80"
