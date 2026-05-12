@@ -207,7 +207,7 @@ function DisplayComplete() {
     onClick={() => setSelectedItem(null)}
   >
     <div
-      className="w-full max-w-sm rounded-2xl bg-white shadow-xl max-h-[70dvh] flex flex-col"
+      className="w-full max-w-sm rounded-2xl bg-white shadow-xl max-h-[50dvh] flex flex-col"
       onClick={(e) => e.stopPropagation()}
     >
       {/* IMAGE */}
@@ -215,7 +215,7 @@ function DisplayComplete() {
         <img
           src={selectedItem.imageUrl}
           alt={selectedItem.title}
-          className="w-full max-h-52 object-cover"
+          className="w-full max-h-95 object-cover"
         />
         <button
           onClick={() => setSelectedItem(null)}
