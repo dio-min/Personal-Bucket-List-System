@@ -203,100 +203,76 @@ function DisplayComplete() {
       {/* MODAL */}
       {selectedItem && (
   <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl p-2"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     onClick={() => setSelectedItem(null)}
   >
     <div
-      className="w-full max-w-2xl max-h-[94vh] overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-2xl flex flex-col"
+      className="w-full max-w-sm rounded-2xl bg-white overflow-hidden shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-5 sm:px-6 py-3 border-b border-neutral-100">
-        <h2 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-900">
-          Completed Goal
-        </h2>
-
+      {/* IMAGE + CLOSE + TITLE OVERLAY */}
+      <div className="relative">
+        <img
+          src={selectedItem.imageUrl}
+          alt={selectedItem.title}
+          className="w-full h-52 object-cover"
+        />
         <button
           onClick={() => setSelectedItem(null)}
-          className="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center text-lg transition"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center text-sm"
         >
           ✕
         </button>
-      </div>
-
-      {/* BODY */}
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
-
-        {/* IMAGE SIDE */}
-        <div className="lg:w-2/5 bg-neutral-50 flex items-center justify-center p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-neutral-200">
-          <div className="w-full max-w-[400px]">
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden">
-              <img
-                src={selectedItem.imageUrl}
-                alt={selectedItem.title}
-                className="w-full h-auto max-h-[55vh] object-cover"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* CONTENT SIDE */}
-        <div className="lg:w-3/5 p-5 sm:p-6 lg:p-8 flex flex-col gap-6 overflow-auto">
-
-          {/* TITLE INSIDE CONTENT (optional, cleaner placement) */}
-          <p className="text-base sm:text-lg px-5 lg:text-xl font-bold text-neutral-900">
+        <div className="absolute bottom-0 inset-x-0 px-5 pb-4 pt-8 bg-gradient-to-t from-black/60 to-transparent">
+          <p className="text-white font-medium text-base leading-snug">
             {capitalizeFirstLetter(selectedItem.title)}
           </p>
-
-          {/* STATS ROW */}
-          <div className="grid grid-cols-2 gap-3">
-
-            {/* RATING */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sm:p-5">
-              <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                YOUR RATING
-              </p>
-
-              <Rating
-                value={selectedItem.rating}
-                readOnly
-                precision={0.5}
-                size="small"
-                sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
-              />
-            </div>
-
-            {/* DATE */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 sm:p-5">
-              <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-2 font-medium tracking-widest">
-                COMPLETED ON
-              </p>
-
-              <p className="text-xs sm:text-sm font-medium text-neutral-900">
-                {selectedItem.date
-                  ? new Date(selectedItem.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "No date"}
-              </p>
-            </div>
-
-          </div>
-
-          {/* DESCRIPTION */}
-          <div className="flex-1 bg-neutral-50 border border-neutral-200 rounded-2xl p-5 sm:p-6">
-            <p className="text-[10px] sm:text-[11px] text-neutral-500 mb-3 font-medium tracking-widest">
-              MY EXPERIENCE
-            </p>
-
-            <p className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
-              {selectedItem.description || "No description provided."}
-            </p>
-          </div>
-
         </div>
+      </div>
+
+      {/* CONTENT */}
+      <div className="p-5 flex flex-col gap-4">
+
+        {/* STATS ROW */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-neutral-50 rounded-xl p-3">
+            <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
+              Your rating
+            </p>
+            <Rating
+              value={selectedItem.rating}
+              readOnly
+              precision={0.5}
+              size="small"
+              sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
+            />
+          </div>
+          <div className="bg-neutral-50 rounded-xl p-3">
+            <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
+              Completed on
+            </p>
+            <p className="text-sm font-medium text-neutral-800">
+              {selectedItem.date
+                ? new Date(selectedItem.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "No date"}
+            </p>
+          </div>
+        </div>
+
+        {/* DESCRIPTION */}
+        <div className="bg-neutral-50 rounded-xl p-4">
+          <p className="text-[10px] text-neutral-400 mb-2 uppercase tracking-wider font-medium">
+            My experience
+          </p>
+          <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">
+            {selectedItem.description || "No description provided."}
+          </p>
+        </div>
+
       </div>
     </div>
   </div>
