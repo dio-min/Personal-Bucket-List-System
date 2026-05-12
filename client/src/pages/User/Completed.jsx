@@ -48,8 +48,6 @@ export const Completed = ({ id, firebaseDocId }) => {
   const [goals, setGoals] = useState([]);
   const [error, setError] = useState(""); // Added missing error state
 
-  const firebaseUid = auth.currentUser?.uid || null;
-
   // Get current user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -165,7 +163,7 @@ export const Completed = ({ id, firebaseDocId }) => {
       formData.append("itemID", docId);
       formData.append("rating", rating);
       formData.append("image", image);
-      formData.append("firebaseUid", firebaseUid);
+      formData.append("firebaseUid", uid);
 
       await axios.post(`${API_BASE_URL}/api/complete/addComplete`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
