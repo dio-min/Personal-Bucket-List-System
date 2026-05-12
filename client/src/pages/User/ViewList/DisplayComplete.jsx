@@ -202,83 +202,86 @@ function DisplayComplete() {
 
       {/* MODAL */}
       {selectedItem && (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-    onClick={() => setSelectedItem(null)}
-  >
-    <div
-      className="
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            className="
         w-full rounded-2xl bg-white shadow-xl overflow-hidden
         flex flex-col max-w-sm max-h-[85dvh]
         sm:flex-row sm:max-w-2xl sm:max-h-[80dvh]
       "
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* IMAGE */}
-      <div className="relative flex-shrink-0 sm:w-2/5">
-        <img
-          src={selectedItem.imageUrl}
-          alt={selectedItem.title}
-          className="w-full object-cover 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* IMAGE */}
+            <div className="relative flex-shrink-0 sm:w-2/5">
+              <img
+                src={selectedItem.imageUrl}
+                alt={selectedItem.title}
+                className="w-full object-cover 
             max-h-120
             sm:h-full sm:max-h-none"
-        />
-        <button
-          onClick={() => setSelectedItem(null)}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center text-sm"
-        >
-          ✕
-        </button>
-        <div className="absolute bottom-0 inset-x-0 px-5 pb-4 pt-8 bg-gradient-to-t from-black/60 to-transparent">
-          <p className="text-white font-medium text-base leading-snug">
-            {capitalizeFirstLetter(selectedItem.title)}
-          </p>
-        </div>
-      </div>
+              />
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center text-sm"
+              >
+                ✕
+              </button>
+              <div className="absolute bottom-0 inset-x-0 px-5 pb-4 pt-8 bg-gradient-to-t from-black/60 to-transparent">
+                <p className="text-white font-medium text-base leading-snug">
+                  {capitalizeFirstLetter(selectedItem.title)}
+                </p>
+              </div>
+            </div>
 
-      {/* CONTENT */}
-      <div className="p-5 flex flex-col gap-4 overflow-y-auto min-h-0 sm:flex-1">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-neutral-50 rounded-xl p-3">
-            <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
-              Your rating
-            </p>
-            <Rating
-              value={selectedItem.rating}
-              readOnly
-              precision={0.5}
-              size="small"
-              sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
-            />
-          </div>
-          <div className="bg-neutral-50 rounded-xl p-3">
-            <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
-              Completed on
-            </p>
-            <p className="text-sm font-medium text-neutral-800">
-              {selectedItem.date
-                ? new Date(selectedItem.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                : "No date"}
-            </p>
-          </div>
-        </div>
+            {/* CONTENT */}
+            <div className="p-5 flex flex-col gap-4 overflow-y-auto min-h-0 sm:flex-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-neutral-50 rounded-xl p-3">
+                  <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
+                    Your rating
+                  </p>
+                  <Rating
+                    value={selectedItem.rating}
+                    readOnly
+                    precision={0.5}
+                    size="small"
+                    sx={{ "& .MuiRating-iconFilled": { color: "#facc15" } }}
+                  />
+                </div>
+                <div className="bg-neutral-50 rounded-xl p-3">
+                  <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
+                    Completed on
+                  </p>
+                  <p className="text-sm font-medium text-neutral-800">
+                    {selectedItem.date
+                      ? new Date(selectedItem.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : "No date"}
+                  </p>
+                </div>
+              </div>
 
-        <div className="bg-neutral-50 rounded-xl p-4 flex-1">
-          <p className="text-[10px] text-neutral-400 mb-2 uppercase tracking-wider font-medium">
-            My experience
-          </p>
-          <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">
-            {selectedItem.description || "No description provided."}
-          </p>
+              <div className="bg-neutral-50 rounded-xl p-4 flex-1">
+                <p className="text-[10px] text-neutral-400 mb-2 uppercase tracking-wider font-medium">
+                  My experience
+                </p>
+                <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">
+                  {selectedItem.description || "No description provided."}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }
