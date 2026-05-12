@@ -207,15 +207,21 @@ function DisplayComplete() {
     onClick={() => setSelectedItem(null)}
   >
     <div
-      className="w-full max-w-sm rounded-2xl bg-white shadow-xl max-h-[85dvh] flex flex-col"
+      className="
+        w-full rounded-2xl bg-white shadow-xl overflow-hidden
+        flex flex-col max-w-sm max-h-[85dvh]
+        sm:flex-row sm:max-w-2xl sm:max-h-[80dvh]
+      "
       onClick={(e) => e.stopPropagation()}
     >
       {/* IMAGE */}
-      <div className="relative flex-shrink-0">
+      <div className="relative flex-shrink-0 sm:w-2/5">
         <img
           src={selectedItem.imageUrl}
           alt={selectedItem.title}
-          className="w-full max-h-110 object-cover"
+          className="w-full object-cover object-top
+            max-h-64
+            sm:h-full sm:max-h-none"
         />
         <button
           onClick={() => setSelectedItem(null)}
@@ -231,7 +237,7 @@ function DisplayComplete() {
       </div>
 
       {/* CONTENT */}
-      <div className="p-5 flex flex-col gap-4 overflow-y-auto min-h-0">
+      <div className="p-5 flex flex-col gap-4 overflow-y-auto min-h-0 sm:flex-1">
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-neutral-50 rounded-xl p-3">
             <p className="text-[10px] text-neutral-400 mb-1.5 uppercase tracking-wider font-medium">
@@ -261,7 +267,7 @@ function DisplayComplete() {
           </div>
         </div>
 
-        <div className="bg-neutral-50 rounded-xl p-4">
+        <div className="bg-neutral-50 rounded-xl p-4 flex-1">
           <p className="text-[10px] text-neutral-400 mb-2 uppercase tracking-wider font-medium">
             My experience
           </p>
