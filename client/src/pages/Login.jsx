@@ -13,6 +13,7 @@ const firebaseErrors = {
   "auth/user-disabled": "This account has been disabled.",
   "auth/too-many-requests": "Too many failed attempts. Please wait or reset your password.",
   "auth/network-request-failed": "Network error, please try again.",
+  "auth/invalid-credential": "Invalid username or password",
 };
 
 function Login() {
