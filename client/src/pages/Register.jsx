@@ -6,6 +6,13 @@ import axios from "axios";
 import BorderGlow from "../component/BorderGlow";
 import API_BASE_URL from "../lib/config";
 
+const firebaseErrors = {
+  "auth/email-already-in-use": "Email is already registered.",
+  "auth/invalid-email": "Invalid email format.",
+  "auth/weak-password": "Password is too weak.",
+  "auth/network-request-failed": "Network error, please try again.",
+};
+
 function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -15,15 +22,41 @@ function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
 
+    // TC-07: Minimum password length
     if (password.length < 8) {
-      alert("Minimum of 8 characters");
+      alert("Minimum of 8 characters.");
+      setLoading(false);
       return;
     }
+
+    // TC-04: Password must contain at least one number
     if (!/[0-9]/.test(password)) {
       alert("Password must contain at least one number.");
+      setLoading(false);
+      return;
+    }
+
+    // TC-06: Password confirmation mismatch
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    // TC-08: Maximum username length
+    if (username.length > 30) {
+      alert("Username must not exceed 30 characters.");
+      setLoading(false);
+      return;
+    }
+
+    // TC-09: Special characters in username (letters, numbers, underscores only)
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      alert("Username can only contain letters, numbers, and underscores.");
+      setLoading(false);
       return;
     }
 
@@ -35,7 +68,7 @@ function Register() {
 
       const response = await axios.post(`${API_BASE_URL}/api/user/register`, {
         username,
-        email,
+        email: email.toLowerCase(), // TC-13: normalize email to lowercase
         uid: firebaseUser.uid,
         profilePicture: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         isdeleted: false,
@@ -45,15 +78,17 @@ function Register() {
       setUsername("");
       setPassword("");
       setConfirmPassword("");
-      setLoading(false)
 
       console.log("Backend response:", response.data);
       alert("User registered successfully!");
-      
+
       navigate("/login");
     } catch (err) {
+      // TC-11: setLoading(false) on error so button is re-enabled
+      setLoading(false);
       console.error("Registration error:", err);
-      alert(err.response?.data?.error || err.message || "Registration failed");
+      // TC-03 / TC-05: friendly Firebase error messages
+      alert(firebaseErrors[err.code] || err.response?.data?.error || err.message || "Registration failed.");
     }
   };
 
@@ -83,6 +118,7 @@ function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              maxLength={254}
               className={inputClass}
             />
             <input
@@ -91,6 +127,7 @@ function Register() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              maxLength={30}
               className={inputClass}
             />
             <input
@@ -99,6 +136,7 @@ function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              maxLength={64}
               className={inputClass}
             />
             <input
@@ -107,16 +145,17 @@ function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              maxLength={64}
               className={inputClass}
             />
 
             <button
-  type="submit"
-  disabled={loading}
-  className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors duration-200"
->
-  {loading ? "Registering..." : "Register"}
-</button>
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 rounded-lg bg-[#96bb7b] hover:bg-[#86ab6f] active:bg-[#789e63] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors duration-200"
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
 
             <Link to="/login" className="w-full">
               <button

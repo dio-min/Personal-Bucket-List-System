@@ -170,7 +170,7 @@ export const Completed = ({ id, firebaseDocId }) => {
       });
 
       
-      setIsOpen(false);
+      alert("Goal has been completed");
       
     } catch (error) {
       console.error(error);

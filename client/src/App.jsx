@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ViewList from "./pages/User/ViewList.jsx";
 import Album from "./pages/User/Album.jsx";
 import "./App.css";
+import Footer from "./pages/Footer.jsx";
 
 
 
@@ -84,6 +85,8 @@ function App() {
           </Routes>
         </Router>
       </div>
+      <Footer/>
+
     </div>
   );
 }

@@ -6,7 +6,14 @@ import axios from "axios";
 import BorderGlow from "../component/BorderGlow";
 import API_BASE_URL from "../lib/config";
 
-const isEmail = (value) => value.includes("@");
+const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const firebaseErrors = {
+  "auth/wrong-password": "Incorrect password.",
+  "auth/user-not-found": "No account found with those credentials.",
+  "auth/user-disabled": "This account has been disabled.",
+  "auth/too-many-requests": "Too many failed attempts. Please wait or reset your password.",
+  "auth/network-request-failed": "Network error, please try again.",
+};
 
 function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -19,7 +26,7 @@ function Login() {
     setLoading(true);
 
     try {
-      let emailToUse = identifier.trim();
+      let emailToUse = identifier.trim().toLowerCase();
 
       if (!isEmail(emailToUse)) {
         const { data } = await axios.post(
@@ -41,7 +48,7 @@ function Login() {
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
-      alert(err.message || "Invalid credentials");
+      alert(firebaseErrors[err.code] || err.message || "Login failed.")
     } finally {
       setLoading(false);
     }
