@@ -9,29 +9,28 @@ const path = require("path");
 
 dotenv.config();
 
-// ✅ Use Render's PORT or fallback to 5050 for local development
 const PORT = process.env.PORT || 5050;
 
-connectDB();
-
-const app = express();
-
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL
-  ],
+const corsOptions = {
+  origin: [process.env.FRONTEND_URL],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+const app = express();
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // ✅ preflight with correct options
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 app.use('/api/user', userRoutes);
 app.use('/api/goal', goalRoutes);
 app.use('/api/complete', completeRoutes);
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   const statusCode = err.statusCode || 500;
@@ -39,6 +38,11 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+};
+
+startServer();
