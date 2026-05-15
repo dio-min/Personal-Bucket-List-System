@@ -152,9 +152,7 @@ function Navigate() {
           <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl border border-black/5 overflow-hidden">
 
             <div className="px-6 pt-6">
-              <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-4">
-                <span className="text-2xl">👋</span>
-              </div>
+              
 
               <h2 className="text-2xl font-bold text-slate-900">
                 Confirm Logout

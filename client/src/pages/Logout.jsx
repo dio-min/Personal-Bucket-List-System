@@ -22,7 +22,7 @@ function Logout({ onSuccess }) {
       <Button 
         variant="destructive"
         onPress={handleLogout}           // ← Changed to onPress
-        style={{ backgroundColor: "#f1f995", color: "#111" }}
+        style={{ backgroundColor: "#0f172b", color: "#111" }}
         className="font-medium"
       >
         Yes, Log Out
