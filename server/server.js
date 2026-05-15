@@ -9,28 +9,31 @@ const path = require("path");
 
 dotenv.config();
 
+// ✅ Use Render's PORT or fallback to 5050 for local development
 const PORT = process.env.PORT || 5050;
 
-const corsOptions = {
-  origin: [process.env.FRONTEND_URL],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
+
 
 const app = express();
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ preflight with correct options
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
 app.use('/api/user', userRoutes);
 app.use('/api/goal', goalRoutes);
 app.use('/api/complete', completeRoutes);
 
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   const statusCode = err.statusCode || 500;
