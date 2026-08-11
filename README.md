@@ -1,6 +1,6 @@
 # Personal Bucket List System
 
-A full-stack web application for creating, tracking, and completing personal bucket list goals. 
+A web application for creating, tracking, and completing personal bucket list goals. 
 
 ## Tech Stack
 
