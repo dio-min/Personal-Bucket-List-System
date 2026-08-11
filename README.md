@@ -1,6 +1,6 @@
 # Personal Bucket List System
 
-A full-stack web application for creating, tracking, and completing personal bucket list goals. Built as a school project, with a particular focus on **system integration** — combining **Firebase Authentication** on the frontend with a separate **Node.js/Express + MongoDB** backend for all application data, rather than relying on a single all-in-one platform.
+A full-stack web application for creating, tracking, and completing personal bucket list goals. 
 
 ## Tech Stack
 
